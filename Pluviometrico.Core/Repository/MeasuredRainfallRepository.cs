@@ -2,6 +2,7 @@
 using Pluviometrico.Core.Repository.Interface;
 using Pluviometrico.Data;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,25 +17,20 @@ namespace Pluviometrico.Core.Repository
             _elasticClient = elasticClient;
         }
 
-        public async Task<MeasuredRainfall> Get(int id)
+        public async Task<List<MeasuredRainfall>> GetListByMonthAndYear(int month, int year)
         {
-            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => 
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s =>
                 s.Query(q =>
-                    q.Bool(b =>
+                    q.Bool(b => 
                         b.Must(m =>
-                            m.Match(m =>
-                                m.Field(f => 
-                                    f.Id == id
-                                )
-                            )
+                            m.Match(m => m.Field(f => f.Mes == month)) &&
+                            m.Match(m => m.Field(f => f.Ano == year))
                         )
                     )
                 )
             );
-            return response?.Documents?.FirstOrDefault();
+
+            return response?.Documents?.ToList();
         }
-
-
-
     }
 }

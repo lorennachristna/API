@@ -16,11 +16,16 @@ namespace Pluviometrico.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet]
-        public async Task<MeasuredRainfall> Get()
+        //Retorna apenas os 10 primeiros
+        //TODO: paging
+        //TODO: DTOs
+        [HttpGet("{month:int}/{year:int}")]
+        public async Task<IActionResult> GetByDate(int month, int year)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.Get(115812084);
-            return response;
+            var response = await _unitOfWork.MeasuredRainfallList.GetListByMonthAndYear(month, year);
+            return Ok(response);
         }
+
+
     }
 }
