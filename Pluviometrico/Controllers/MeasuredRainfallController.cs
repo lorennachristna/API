@@ -26,6 +26,11 @@ namespace Pluviometrico.Controllers
             return Ok(response);
         }
 
-
+        [HttpGet("{greaterThanYear}/{lessThanYear}/{distance:double}")]
+        public async Task<IActionResult> GetByDistance(int greaterThanYear, int lessThanYear, double distance)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.GetByDistance(greaterThanYear, lessThanYear, distance);
+            return Ok(response);
+        }
     }
 }
