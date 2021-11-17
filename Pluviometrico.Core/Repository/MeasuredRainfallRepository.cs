@@ -25,8 +25,8 @@ namespace Pluviometrico.Core.Repository
                 s.Query(q =>
                     q.Bool(b => 
                         b.Must(m =>
-                            m.Match(m => m.Field(f => f.Mes == month)) &&
-                            m.Match(m => m.Field(f => f.Ano == year))
+                            m.Term(t => t.Field(f => f.Mes).Value(month)) &&
+                            m.Term(t => t.Field(f => f.Ano).Value(year))
                         )
                     )
                 )
@@ -36,7 +36,7 @@ namespace Pluviometrico.Core.Repository
         }
 
         //TODO: Check if adding "distancia" field significantly slows response time"?
-        public async Task<List<ElasticSearchHit>> GetByDistance(int greaterThanYear, int lessThanYear, double distance)
+        public async Task<List<ElasticSearchHit>> GetByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
         {
             var distanceCalculationString = "6371 * Math.acos(Math.cos(-22.9060000000000*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.0530000000000*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.9060000000000*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
 
@@ -66,5 +66,37 @@ namespace Pluviometrico.Core.Repository
 
             return hits.ToList();
         }
+
+        public async Task<List<ElasticSearchHit>> GetByDistanceAndYear(int year, double distance)
+        {
+            var distanceCalculationString = "6371 * Math.acos(Math.cos(-22.9060000000000*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.0530000000000*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.9060000000000*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
+
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(sf =>
+                    sf.ScriptField("distancia", script => script
+                        .Source(distanceCalculationString)
+                    )
+                )
+                .Query(q =>
+                    q.Bool(b => b
+                        .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {distanceCalculationString} ; return distancia < {distance};"))))
+                        .Must(m => m.Term(t => t.Field(f => f.Ano).Value(year)))
+                    )
+                )
+            );
+
+            var hits = response?.Hits?.Select(h => {
+                return new ElasticSearchHit
+                {
+                    Source = h.Source,
+                    //Created class "Fields" has to be declared as "Data.Fields" (Data is the folder) to avoid ambiguity
+                    Fields = new Data.Fields { Distancia = h.Fields.Value<double>("distancia") }
+                };
+            });
+
+            return hits.ToList();
+        }
+
     }
 }

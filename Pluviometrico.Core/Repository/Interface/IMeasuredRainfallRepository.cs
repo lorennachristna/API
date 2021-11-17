@@ -8,6 +8,7 @@ namespace Pluviometrico.Core.Repository.Interface
     public interface IMeasuredRainfallRepository
     {
         Task<List<MeasuredRainfall>> GetListByMonthAndYear(int month, int year);
-        Task<List<ElasticSearchHit>> GetByDistance(int greaterThanYear, int lessThanYear, double distance);
+        Task<List<ElasticSearchHit>> GetByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance);
+        Task<List<ElasticSearchHit>> GetByDistanceAndYear(int year, double distance);
     }
 }
