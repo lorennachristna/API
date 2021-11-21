@@ -12,5 +12,8 @@ namespace Pluviometrico.Core.Repository.Interface
         Task<List<ElasticSearchHit>> GetByDistanceAndYear(int year, double distance);
         Task<List<object>> GetValueAggregationsByDate(int year);
         Task<List<object>> GetValueAggregationsByDistance(int year, double distance);
+        Task<List<object>> GetValueAggregationsByDistanceGroupByStation(int year, double distance);
+        Task<List<MeasuredRainfall>> GetAll();
+        Task<List<object>> FilterByDistance(double distance);
     }
 }

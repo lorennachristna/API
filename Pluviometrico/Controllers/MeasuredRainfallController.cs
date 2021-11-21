@@ -53,5 +53,26 @@ namespace Pluviometrico.Controllers
             var response = await _unitOfWork.MeasuredRainfallList.GetValueAggregationsByDistance(year, distance);
             return Ok(response);
         }
+
+        [HttpGet("valormedida/estacao/distancia/ano")]
+        public async Task<IActionResult> GetSumValueGroupByStation([FromQuery] int year, [FromQuery] double distance)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.GetValueAggregationsByDistanceGroupByStation(year, distance);
+            return Ok(response);
+        }
+
+        [HttpGet("todos")]
+        public async Task<IActionResult> GetAll()
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.GetAll();
+            return Ok(response);
+        }
+
+        [HttpGet("filtro/distancia")]
+        public async Task<IActionResult> FilterByDistance([FromQuery] double distance)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistance(distance);
+            return Ok(response);
+        }
     }
 }
