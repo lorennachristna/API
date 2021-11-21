@@ -15,5 +15,6 @@ namespace Pluviometrico.Core.Repository.Interface
         Task<List<object>> GetValueAggregationsByDistanceGroupByStation(int year, double distance);
         Task<List<MeasuredRainfall>> GetAll();
         Task<List<object>> FilterByDistance(double distance);
+        Task<List<object>> GetAllWithDistance();
     }
 }

@@ -74,5 +74,11 @@ namespace Pluviometrico.Controllers
             var response = await _unitOfWork.MeasuredRainfallList.FilterByDistance(distance);
             return Ok(response);
         }
+        [HttpGet("todos/distancia")]
+        public async Task<IActionResult> GetAllWithDistance()
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.GetAllWithDistance();
+            return Ok(response);
+        }
     }
 }

@@ -351,5 +351,30 @@ namespace Pluviometrico.Core.Repository
 
             return filteredResponse;
         }
+
+        public async Task<List<object>> GetAllWithDistance()
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(s => s
+                    .ScriptField("distancia", script => script
+                        .Source(_distanceCalculationString)
+                    )
+                )
+            );
+
+            var filteredResponse = new List<object>();
+
+            foreach (var hit in response?.Hits)
+            {
+                filteredResponse.Add(new
+                {
+                    source = hit.Source,
+                    distancia = hit.Fields.Value<double>("distancia")
+                });
+            }
+
+            return filteredResponse;
+        }
     }
 }
