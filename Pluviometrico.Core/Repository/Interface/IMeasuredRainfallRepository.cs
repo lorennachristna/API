@@ -16,5 +16,6 @@ namespace Pluviometrico.Core.Repository.Interface
         Task<List<MeasuredRainfall>> GetAll();
         Task<List<object>> FilterByDistance(double distance);
         Task<List<object>> GetAllWithDistance();
+        Task<List<object>> GetValueByCityAndYear();
     }
 }

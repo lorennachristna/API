@@ -80,5 +80,12 @@ namespace Pluviometrico.Controllers
             var response = await _unitOfWork.MeasuredRainfallList.GetAllWithDistance();
             return Ok(response);
         }
+
+        [HttpGet("municipio/ano/soma")]
+        public async Task<IActionResult> GetValueByYearAndCity()
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.GetValueByCityAndYear();
+            return Ok(response);
+        }
     }
 }

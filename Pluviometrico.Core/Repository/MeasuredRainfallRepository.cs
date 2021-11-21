@@ -376,5 +376,40 @@ namespace Pluviometrico.Core.Repository
 
             return filteredResponse;
         }
+
+        public async Task<List<object>> GetValueByCityAndYear()
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s.Aggregations(a => a
+                .Terms("municipio", t => t
+                    .Field(f => f.Municipio.Suffix("keyword"))
+                    .Aggregations(a => a
+                        .Terms("ano", t => t
+                            .Field(f => f.Ano)
+                            .Aggregations(a => a
+                                .Sum("soma", s => s
+                                    .Field(f => f.ValorMedida))))))
+            ));
+            var filteredResponse = new List<object>();
+
+            var cityBuckets = response.Aggregations.Terms("municipio").Buckets;
+            foreach (var cityBucket in cityBuckets)
+            {
+                var city = cityBucket.Key;
+                var yearBuckets = cityBucket.Terms("ano").Buckets;
+                foreach (var yearBucket in yearBuckets)
+                {
+                    var year = yearBucket.Key;
+                    var sum = yearBucket.Sum("soma").Value;
+                    filteredResponse.Add(new
+                    {
+                        municipio = city,
+                        ano = year,
+                        soma = sum
+                    });
+                }
+            }
+
+            return filteredResponse;
+        }
     }
 }
