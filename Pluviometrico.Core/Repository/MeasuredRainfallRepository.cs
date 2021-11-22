@@ -411,5 +411,114 @@ namespace Pluviometrico.Core.Repository
 
             return filteredResponse;
         }
+
+        public async Task<List<object>> GetValueByStationAndDistance(double distance)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Size(0)
+                .RuntimeFields(r => r.RuntimeField("distancia", FieldType.Double, f => f
+                    .Script($"double distancia = { _distanceCalculationString}; emit(distancia);")))
+                .Aggregations(a => a
+                    .Terms("codEstacao", t => t
+                        .Field(f => f.CodEstacaoOriginal.Suffix("keyword"))
+                        .Aggregations(a => a
+                            .Terms("estacao", t => t
+                                .Field(f => f.NomeEstacaoOriginal.Suffix("keyword"))
+                                .Aggregations(a => a
+                                    .Terms("distancia", t => t
+                                        .Field("distancia")
+                                        .Aggregations(a => a
+                                            .Sum("soma", s => s
+                                                .Field(f => f.ValorMedida)))))))))
+                .Query(q => q.Bool(b => b.Must(m => m.Range(r => r.Field("distancia").LessThan(distance))))));
+
+            var filteredResponse = new List<object>();
+
+            var stationCodeBuckets = response.Aggregations.Terms("codEstacao").Buckets;
+            foreach (var stationCodeBucket in stationCodeBuckets)
+            {
+                var stationCode = stationCodeBucket.Key;
+                var stationBuckets = stationCodeBucket.Terms("estacao").Buckets;
+                foreach (var stationBucket in stationBuckets)
+                {
+                    var station = stationBucket.Key;
+                    var distanceBuckets = stationBucket.Terms("distancia").Buckets;
+                    foreach (var distanceBucket in distanceBuckets)
+                    {
+                        var responseDistance = distanceBucket.Key;
+                        var sum = distanceBucket.Sum("soma").Value;
+                        filteredResponse.Add(new {
+                            codEstacao = stationCode,
+                            estacao = station,
+                            distancia = responseDistance,
+                            soma = sum
+                        });
+                    }
+                }
+            }
+
+            return filteredResponse;
+        }
+        
+        public async Task<List<object>> GetValueByDistance(double distance)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Size(0)
+                .RuntimeFields(r => r.RuntimeField("distancia", FieldType.Double, r => r
+                    .Script($"double distancia = { _distanceCalculationString}; emit(distancia);")
+                ))
+                .Aggregations(a => a
+                    .Terms("mes", t => t
+                        .Field(f => f.Mes)
+                        .Aggregations(a => a
+                            .Terms("ano", t => t
+                                .Field(f => f.Ano)
+                                .Aggregations(a => a
+                                    .Terms("municipio", t => t
+                                        .Field(f => f.Municipio.Suffix("keyword"))
+                                        .Aggregations(a => a
+                                            .Terms("distancia", t => t
+                                                .Field("distancia")
+                                                .Aggregations(a => a
+                                                    .Sum("soma", s => s.Field(f => f.ValorMedida)))
+                 ))))))))
+                .Query(q => q.Bool(b => b.Must(m => m.Range(r => r.Field("distancia").LessThan(distance)))))
+            );
+
+            var filteredResponse = new List<object>();
+
+            var monthBuckets = response.Aggregations.Terms("mes").Buckets;
+            foreach (var monthBucket in monthBuckets)
+            {
+                var month = monthBucket.Key;
+                var yearBuckets = monthBucket.Terms("ano").Buckets;
+                foreach(var yearBucket in yearBuckets)
+                {
+                    var year = yearBucket.Key;
+                    var cityBuckets = yearBucket.Terms("municipio").Buckets;
+                    foreach (var cityBucket in cityBuckets)
+                    {
+                        var city = cityBucket.Key;
+                        var distanceBuckets = cityBucket.Terms("distancia").Buckets;
+                        foreach (var distanceBucket in distanceBuckets)
+                        {
+                            var responseDistance = distanceBucket.Key;
+                            var sum = distanceBucket.Sum("soma").Value;
+                            filteredResponse.Add(new
+                            {
+                                mes = month,
+                                ano = year,
+                                municipio = city,
+                                distancia = responseDistance,
+                                soma = sum
+                            }
+                            );
+                        }
+                    }
+                }
+            }
+
+            return filteredResponse;
+        }
     }
 }
