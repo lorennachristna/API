@@ -18,9 +18,6 @@ namespace Pluviometrico.Core.Repository
         {
             _elasticClient = elasticClient;
         }
-
-        //TODO: Google difference between match and term, which one is better for texts, ints, etc.
-        //TODO: Describe each ES type (query, bool, must, etc)
         public async Task<List<MeasuredRainfall>> GetListByMonthAndYear(int month, int year)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s =>
@@ -38,39 +35,32 @@ namespace Pluviometrico.Core.Repository
         }
 
         //TODO: Check if adding "distancia" field significantly slows response time"?
-        //TODO: Remove local variable distanceCalculationString (replace by global _distanceCalculationString)
-        public async Task<List<ElasticSearchHit>> GetByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
+        public async Task<List<object>> GetByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
         {
-            var distanceCalculationString = "6371 * Math.acos(Math.cos(-22.9060000000000*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.0530000000000*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.9060000000000*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
-
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Source(true)
                 .ScriptFields(sf =>
                     sf.ScriptField("distancia", script => script
-                        .Source(distanceCalculationString)
-                    )
-                )
+                        .Source(_distanceCalculationString)))
                 .Query(q =>
                     q.Bool(b => b
-                        .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {distanceCalculationString} ; return distancia < {distance};"))))
-                        .Must(m => m.Range(r => r.Field(f => f.Ano).GreaterThanOrEquals(greaterThanYear).LessThanOrEquals(lessThanYear)))
-                    )
-                )
-            );
-            //TODO: mudar para lista de objetos - fields como distancia (assim como no método FilterByDistance)
-            var hits = response?.Hits?.Select(h => {
-                return new ElasticSearchHit
+                        .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {_distanceCalculationString} ; return distancia < {distance};"))))
+                        .Must(m => m.Range(r => r.Field(f => f.Ano).GreaterThanOrEquals(greaterThanYear).LessThanOrEquals(lessThanYear))))));
+
+            var filteredResponse = new List<object>();
+
+            foreach(var h in response?.Hits)
+            {
+                filteredResponse.Add(new
                 {
                     Source = h.Source,
-                    //Created class "Fields" has to be declared as "Data.Fields" (Data is the folder) to avoid ambiguity
-                    Fields = new Data.Fields { Distancia = h.Fields.Value<double>("distancia") }
-                };
-             });
-
-            return hits.ToList();
+                    Distancia = h.Fields.Value<double>("distancia")
+                });
+            }
+            return filteredResponse;
         }
 
-        public async Task<List<ElasticSearchHit>> GetByDistanceAndYear(int year, double distance)
+        public async Task<List<object>> GetByDistanceAndYear(int year, double distance)
         {
             var distanceCalculationString = "6371 * Math.acos(Math.cos(-22.9060000000000*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.0530000000000*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.9060000000000*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
 
@@ -78,27 +68,24 @@ namespace Pluviometrico.Core.Repository
                 .Source(true)
                 .ScriptFields(sf =>
                     sf.ScriptField("distancia", script => script
-                        .Source(distanceCalculationString)
-                    )
-                )
+                        .Source(distanceCalculationString)))
                 .Query(q =>
                     q.Bool(b => b
                         .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {distanceCalculationString} ; return distancia < {distance};"))))
-                        .Must(m => m.Term(t => t.Field(f => f.Ano).Value(year)))
-                    )
-                )
-            );
+                        .Must(m => m.Term(t => t.Field(f => f.Ano).Value(year))))));
 
-            var hits = response?.Hits?.Select(h => {
-                return new ElasticSearchHit
+            var filteredResponse = new List<object>();
+
+            foreach (var h in response?.Hits)
+            {
+                filteredResponse.Add(new
                 {
                     Source = h.Source,
-                    //Created class "Fields" has to be declared as "Data.Fields" (Data is the folder) to avoid ambiguity
-                    Fields = new Data.Fields { Distancia = h.Fields.Value<double>("distancia") }
-                };
-            });
+                    Distancia = h.Fields.Value<double>("distancia")
+                });
+            }
 
-            return hits.ToList();
+            return filteredResponse;
         }
 
         //TODO: check if .keyword makes any difference (yes it does, if i don't use it, it returns an error)
