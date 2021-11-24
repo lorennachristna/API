@@ -88,8 +88,6 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
 
-        //TODO: check if .keyword makes any difference (yes it does, if i don't use it, it returns an error)
-        //TODO: remove "year" aggregation: year is already determined by query
         public async Task<List<object>> GetValueAggregationsByDate(int year)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
@@ -99,17 +97,9 @@ namespace Pluviometrico.Core.Repository
                     //aggregations inside "municipio"
                     .Aggregations(a => a.Terms("mes", t => t
                         .Field(f => f.Mes)
-                        .Aggregations(a => a.Terms("ano", t => t
-                            .Field(f => f.Ano)
-                            .Aggregations(a => a.Sum("soma", s => s
-                                .Field(f => f.ValorMedida)
-                            ))
-                        ))
-                    ))
-                ))
-                .Query(q => q.Bool(b => b.Must(m => m.Term(t => t.Field(f => f.Ano).Value(year))))
-                )
-            );
+                        .Aggregations(a => a.Sum("soma", s => s
+                            .Field(f => f.ValorMedida)))))))
+                .Query(q => q.Bool(b => b.Must(m => m.Term(t => t.Field(f => f.Ano).Value(year))))));
 
             var filteredResponse = new List<object>();
 
@@ -121,24 +111,18 @@ namespace Pluviometrico.Core.Repository
                 foreach(var monthBucket in monthBuckets)
                 {
                     var month = monthBucket.Key; 
-                    var yearBuckets = monthBucket.Terms<double>("ano").Buckets;
-                    foreach(var yearBucket in yearBuckets)
-                    {
-                        var responseYear = yearBucket.Key;
-                        var sumValueBuckets = yearBucket.Sum("soma").Value;
-                        filteredResponse.Add(new {
-                            cidade = city,
-                            mes = month,
-                            year = responseYear,
-                            soma_valormedida = sumValueBuckets
-                        });
-                    }
+                    var sumValueBuckets = monthBucket.Sum("soma").Value;
+                    filteredResponse.Add(new {
+                        cidade = city,
+                        mes = month,
+                        year = year,
+                        soma_valormedida = sumValueBuckets
+                    });
                 }
             }
             return filteredResponse;
         }
 
-        //TODO: remove "year" aggregation: year is already determined by query
         public async Task<List<object>> GetValueAggregationsByDistance(int year, double distance)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
@@ -154,21 +138,10 @@ namespace Pluviometrico.Core.Repository
                             .Terms("mes", t => t
                                 .Field(f => f.Mes)
                                 .Aggregations(a => a
-                                   .Terms("ano", t => t
-                                       .Field(f => f.Ano)
-                                       .Aggregations(a => a
-                                            .Terms("distancia", t => t
-                                                .Field("distancia")
-                                                .Aggregations(a => a
-                                                    .Sum("soma", s => s.Field(f => f.ValorMedida)))
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
+                                    .Terms("distancia", t => t
+                                        .Field("distancia")
+                                        .Aggregations(a => a
+                                            .Sum("soma", s => s.Field(f => f.ValorMedida)))))))))
                 .Query(q => q.Bool(b => b
                     .Must(m =>
                         m.Term(t => t.
@@ -193,24 +166,19 @@ namespace Pluviometrico.Core.Repository
                 foreach(var monthBucket in monthBuckets)
                 {
                     var month = monthBucket.Key;
-                    var yearBuckets = monthBucket.Terms("ano").Buckets;
-                    foreach (var yearBucket in yearBuckets)
+                    var distanceBuckets = monthBucket.Terms("distancia").Buckets;
+                    foreach (var distanceBucket in distanceBuckets)
                     {
-                        var responseYear = yearBucket.Key;
-                        var distanceBuckets = yearBucket.Terms("distancia").Buckets;
-                        foreach (var distanceBucket in distanceBuckets)
+                        var responseDistance = distanceBucket.Key;
+                        var sum = distanceBucket.Sum("soma").Value;
+                        filteredResponse.Add(new
                         {
-                            var responseDistance = distanceBucket.Key;
-                            var sum = distanceBucket.Sum("soma").Value;
-                            filteredResponse.Add(new
-                            {
-                                cidade = city,
-                                mes = month,
-                                ano = responseYear,
-                                distancia = responseDistance,
-                                soma = sum
-                            });
-                        }
+                            cidade = city,
+                            mes = month,
+                            ano = year,
+                            distancia = double.Parse(responseDistance),
+                            soma = sum
+                        });
                     }
                 }
             }
