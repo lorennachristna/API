@@ -16,48 +16,50 @@ namespace Pluviometrico.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        //Retorna apenas os 10 primeiros
+        //Retorna apenas os 10 primeiros?
+        //TODO: Retornar status de erro quando der erro
+        //TODO: padronizar controller
         //TODO: paging
         //TODO: DTOs
         [HttpGet("{month:int}/{year:int}")]
         public async Task<IActionResult> GetByDate(int month, int year)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetListByMonthAndYear(month, year);
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByMonthAndYear(month, year);
             return Ok(response);
         }
 
         [HttpGet("{greaterThanYear:int}/{lessThanYear:int}/{distance:double}")]
         public async Task<IActionResult> GetByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetByDistanceAndYearRange(greaterThanYear, lessThanYear, distance);
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndYearRange(greaterThanYear, lessThanYear, distance);
             return Ok(response);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetByDistanceAndYear([FromQuery] int year, [FromQuery] double distance)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetByDistanceAndYear(year, distance);
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndYear(year, distance);
             return Ok(response);
         }
 
         [HttpGet("valormedida/ano")]
         public async Task<IActionResult> GetSumValueGroupByDate([FromQuery] int year)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetValueAggregationsByDate(year);
+            var response = await _unitOfWork.MeasuredRainfallList.GetMeasureByCityFilterByDate(year);
             return Ok(response);
         }
 
         [HttpGet("valormedida/distancia/ano")]
         public async Task<IActionResult> GetSumValueGroupByDateAndDistance([FromQuery] int year, [FromQuery] double distance)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetValueAggregationsByDistance(year, distance);
+            var response = await _unitOfWork.MeasuredRainfallList.GetMeasureByCityFilterByYearAndDistance(year, distance);
             return Ok(response);
         }
 
         [HttpGet("valormedida/estacao/distancia/ano")]
         public async Task<IActionResult> GetSumValueGroupByStation([FromQuery] int year, [FromQuery] double distance)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetValueAggregationsByDistanceGroupByStation(year, distance);
+            var response = await _unitOfWork.MeasuredRainfallList.GetAverageMeasureByCityAndStationFilterByDateAndDistance(year, distance);
             return Ok(response);
         }
 
@@ -84,21 +86,21 @@ namespace Pluviometrico.Controllers
         [HttpGet("municipio/ano/soma")]
         public async Task<IActionResult> GetValueByYearAndCity()
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetValueByCityAndYear();
+            var response = await _unitOfWork.MeasuredRainfallList.GetMeasureByCityAndYear();
             return Ok(response);
         }
 
         [HttpGet("distance/estacao")]
         public async Task<IActionResult> GetValueByDistanceAndStation([FromQuery] double distance)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetValueByStationAndDistance(distance);
+            var response = await _unitOfWork.MeasuredRainfallList.GetMeasureByCityAndYearFilterByDistance(distance);
             return Ok(response);
         }
 
         [HttpGet("distancia")]
         public async Task<IActionResult> GetValueByDistance([FromQuery] double distance)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetValueByDistance(distance);
+            var response = await _unitOfWork.MeasuredRainfallList.GetMeasureByCityAndDateFilterByDistance(distance);
             return Ok(response);
         }
     }
