@@ -18,7 +18,7 @@ namespace Pluviometrico.Core.Repository
         {
             _elasticClient = elasticClient;
         }
-        public async Task<List<MeasuredRainfall>> GetListByMonthAndYear(int month, int year)
+        public async Task<List<MeasuredRainfall>> FilterByMonthAndYear(int month, int year)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s =>
                 s.Query(q =>
@@ -35,7 +35,7 @@ namespace Pluviometrico.Core.Repository
         }
 
         //TODO: Check if adding "distancia" field significantly slows response time"?
-        public async Task<List<object>> GetByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
+        public async Task<List<object>> FilterByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Source(true)
@@ -60,7 +60,7 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
 
-        public async Task<List<object>> GetByDistanceAndYear(int year, double distance)
+        public async Task<List<object>> FilterByDistanceAndYear(int year, double distance)
         {
             var distanceCalculationString = "6371 * Math.acos(Math.cos(-22.9060000000000*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.0530000000000*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.9060000000000*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
 
@@ -88,7 +88,7 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
 
-        public async Task<List<object>> GetValueAggregationsByDate(int year)
+        public async Task<List<object>> GetMeasureByCityFilterByDate(int year)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Size(0)
@@ -123,7 +123,7 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
 
-        public async Task<List<object>> GetValueAggregationsByDistance(int year, double distance)
+        public async Task<List<object>> GetMeasureByCityFilterByYearAndDistance(int year, double distance)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Size(0)
@@ -186,7 +186,7 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
 
-        public async Task<List<object>> GetValueAggregationsByDistanceGroupByStation(int year, double distance)
+        public async Task<List<object>> GetAverageMeasureByCityAndStationFilterByDateAndDistance(int year, double distance)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .RuntimeFields<MeasuredRainfallRuntimeFields>(r => r
@@ -332,7 +332,7 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
 
-        public async Task<List<object>> GetValueByCityAndYear()
+        public async Task<List<object>> GetMeasureByCityAndYear()
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s.Aggregations(a => a
                 .Terms("municipio", t => t
@@ -367,7 +367,7 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
 
-        public async Task<List<object>> GetValueByStationAndDistance(double distance)
+        public async Task<List<object>> GetMeasureByCityAndYearFilterByDistance(double distance)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Size(0)
@@ -415,7 +415,7 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
         
-        public async Task<List<object>> GetValueByDistance(double distance)
+        public async Task<List<object>> GetMeasureByCityAndDateFilterByDistance(double distance)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Size(0)
