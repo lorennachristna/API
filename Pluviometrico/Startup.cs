@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,6 +9,7 @@ using Nest;
 using Pluviometrico.Core.Repository;
 using Pluviometrico.Core.Repository.Interface;
 using Pluviometrico.Data;
+using Pluviometrico.Data.DatabaseContext;
 
 namespace Pluviometrico
 {
@@ -23,6 +25,9 @@ namespace Pluviometrico
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<PostgreSQLContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("sqlConnections"))
+            );
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
