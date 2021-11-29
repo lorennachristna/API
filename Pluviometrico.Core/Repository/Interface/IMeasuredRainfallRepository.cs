@@ -39,7 +39,7 @@ namespace Pluviometrico.Core.Repository.Interface
         //Devolve código e nome da estação, município, mês, ano, distância e
         //média de valores de chuva (agregação) por estação, município, mês, ano e distância
         //Filtra por ano e distância E MÊS
-        Task<List<object>> GetAverageMeasureByCityAndStationFilterByDateAndDistance(int year, double distance);
+        Task<List<object>> GetAverageMeasureByCityAndStationFilterByDateAndDistance(int year, double distance, int month);
 
         //7
         //Devolve todos os campos

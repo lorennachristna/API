@@ -186,7 +186,8 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
 
-        public async Task<List<object>> GetAverageMeasureByCityAndStationFilterByDateAndDistance(int year, double distance)
+        //TODO: filtrar por mês também
+        public async Task<List<object>> GetAverageMeasureByCityAndStationFilterByDateAndDistance(int year, double distance, int month)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .RuntimeFields<MeasuredRainfallRuntimeFields>(r => r
@@ -240,7 +241,7 @@ namespace Pluviometrico.Core.Repository
                         var monthBuckets = cityBucket.Terms("mes").Buckets;
                         foreach (var monthBucket in monthBuckets)
                         {
-                            var month = monthBucket.Key;
+                            var responseMonth = monthBucket.Key;
                             var yearBuckets = monthBucket.Terms("ano").Buckets;
                             foreach (var yearBucket in yearBuckets)
                             {
@@ -255,7 +256,7 @@ namespace Pluviometrico.Core.Repository
                                         codigoEstacao = stationCode,
                                         estacao = station,
                                         municipio = city,
-                                        mes = month,
+                                        mes = responseMonth,
                                         ano = responseYear,
                                         distancia = responseDistance,
                                         media = average

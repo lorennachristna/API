@@ -56,10 +56,11 @@ namespace Pluviometrico.Controllers
             return Ok(response);
         }
 
+        //TODO: Adicionar mês como parâmetro
         [HttpGet("valormedida/estacao/distancia/ano")]
         public async Task<IActionResult> GetSumValueGroupByStation([FromQuery] int year, [FromQuery] double distance)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetAverageMeasureByCityAndStationFilterByDateAndDistance(year, distance);
+            var response = await _unitOfWork.MeasuredRainfallList.GetAverageMeasureByCityAndStationFilterByDateAndDistance(year, distance,7);
             return Ok(response);
         }
 
