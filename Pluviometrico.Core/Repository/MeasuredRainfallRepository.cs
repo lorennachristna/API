@@ -113,10 +113,10 @@ namespace Pluviometrico.Core.Repository
                     var month = monthBucket.Key; 
                     var sumValueBuckets = monthBucket.Sum("soma").Value;
                     filteredResponse.Add(new {
-                        cidade = city,
+                        municipio = city,
                         mes = month,
-                        year = year,
-                        soma_valormedida = sumValueBuckets
+                        ano = year,
+                        soma = sumValueBuckets
                     });
                 }
             }
@@ -173,11 +173,10 @@ namespace Pluviometrico.Core.Repository
                         var sum = distanceBucket.Sum("soma").Value;
                         filteredResponse.Add(new
                         {
-                            cidade = city,
+                            municipio = city,
                             mes = month,
-                            ano = year,
-                            distancia = double.Parse(responseDistance),
-                            soma = sum
+                            soma = sum,
+                            distancia = double.Parse(responseDistance)
                         });
                     }
                 }
@@ -253,8 +252,8 @@ namespace Pluviometrico.Core.Repository
                                     var average = distanceBucket.Average("media").Value;
                                     filteredResponse.Add(new
                                     {
-                                        codigoEstacao = stationCode,
-                                        estacao = station,
+                                        codEstacaoOriginal = stationCode,
+                                        nomeEstacaoOriginal = station,
                                         municipio = city,
                                         mes = responseMonth,
                                         ano = responseYear,
@@ -404,8 +403,8 @@ namespace Pluviometrico.Core.Repository
                         var responseDistance = distanceBucket.Key;
                         var sum = distanceBucket.Sum("soma").Value;
                         filteredResponse.Add(new {
-                            codEstacao = stationCode,
-                            estacao = station,
+                            codEstacaoOriginal = stationCode,
+                            nomeEstacaoOriginal = station,
                             distancia = responseDistance,
                             soma = sum
                         });
