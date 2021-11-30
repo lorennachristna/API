@@ -28,52 +28,46 @@ namespace Pluviometrico.Core.Repository
         //TODO: See if responses are equal in both aproaches
         public Task<List<object>> FilterByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
         {
-            //var response = _context.MeasuredRainfallList.Select(m => 
-            //    new {
-            //        Source = m,
-            //        Distance = CalculateDistance(m.Latitude, m.Longitude)
-            //    })
-            //.Where(n =>
-            //    n.Distance < distance &&
-            //    n.Source.Ano >= greaterThanYear &&
-            //    n.Source.Ano <= lessThanYear)
-            //.Select(w => (object) w);
-
-            var response = from m in _context.MeasuredRainfallList
-                           let distancia = 6371 *
-                            Math.Acos(
-                                Math.Cos((Math.PI / 180)*(-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180)*(-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
-                                Math.Sin((Math.PI / 180) * (m.Latitude))
-                            )
-                           where distancia < distance && m.Ano >= greaterThanYear && m.Ano <= lessThanYear
-                           select (object) new
-                           {
-                               Source = m,
-                               Distance = distancia
-                           };
-
-            return response.Take(10).ToListAsync();
-        }
-
-        public Task<List<object>> FilterByDistanceAndYear(int year, double distance)
-        {
-            var response = from m in _context.MeasuredRainfallList
-                           let distancia = 6371 *
+            var response = _context.MeasuredRainfallList.Select(m =>
+                new
+                {
+                    Source = m,
+                    Distancia = 6371 *
                             Math.Acos(
                                 Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
                                 Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
                                 Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
-                           where distancia < distance && m.Ano == year
-                           select (object)new
-                           {
-                               Source = m,
-                               Distance = distancia
-                           };
+                })
+            .Where(n =>
+                n.Distancia < distance &&
+                n.Source.Ano >= greaterThanYear &&
+                n.Source.Ano <= lessThanYear)
+            .Select(w => (object) w);
 
+            return response.Take(10).ToListAsync();
+        }
+
+        public Task<List<object>> FilterByDistanceAndYear(int year, double distance)
+        {
+            var response = _context.MeasuredRainfallList
+                .Select(m =>
+                    new
+                    {
+                        Source = m,
+                        Distancia = 6371 *
+                            Math.Acos(
+                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Sin((Math.PI / 180) * (m.Latitude))
+                            )
+                    }
+                )
+                .Where(n => n.Distancia < distance && n.Source.Ano == year)
+                .Select(n => (object) n);
+            
             return response.Take(10).ToListAsync();
         }
 
