@@ -28,7 +28,8 @@ namespace Pluviometrico.Core.Repository
         //TODO: See if responses are equal in both aproaches
         public Task<List<object>> FilterByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
         {
-            var response = _context.MeasuredRainfallList.Select(m =>
+            var response = _context.MeasuredRainfallList
+                .Select(m =>
                 new
                 {
                     Source = m,
@@ -37,14 +38,12 @@ namespace Pluviometrico.Core.Repository
                                 Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
                                 Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
                                 Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
-                                Math.Sin((Math.PI / 180) * (m.Latitude))
-                            )
-                })
-            .Where(n =>
-                n.Distancia < distance &&
-                n.Source.Ano >= greaterThanYear &&
-                n.Source.Ano <= lessThanYear)
-            .Select(w => (object) w);
+                                Math.Sin((Math.PI / 180) * (m.Latitude)))})
+                .Where(n =>
+                    n.Distancia < distance &&
+                    n.Source.Ano >= greaterThanYear &&
+                    n.Source.Ano <= lessThanYear)
+                .Select(w => (object) w);
 
             return response.Take(10).ToListAsync();
         }
