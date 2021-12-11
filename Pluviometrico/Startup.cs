@@ -26,7 +26,11 @@ namespace Pluviometrico
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<PostgreSQLContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("sqlConnections"))
+                options.UseNpgsql(Configuration.GetConnectionString("sqlPgUniqueTable"))
+            );
+
+            services.AddDbContext<DWContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("sqlPgDW"))
             );
 
             services.AddControllers();
