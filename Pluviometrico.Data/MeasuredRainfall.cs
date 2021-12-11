@@ -78,5 +78,31 @@ namespace Pluviometrico.Data
         [PropertyName("cidade")]
         [Column("cidade")]
         public string Cidade { get; set; }
+
+        public MeasuredRainfall()
+        {
+        }
+
+        public MeasuredRainfall(int id, string municipio, string codEstacaoOriginal, string uF, string nomeEstacaoOriginal, double latitude, double longitude, DateTime dataHora, double valorMedida, int hora, int dia, int minuto, int mes, int ano, DateTime dataHoraAjustada, string estado, string bairro, string cidade)
+        {
+            Id = id;
+            Municipio = municipio;
+            CodEstacaoOriginal = codEstacaoOriginal;
+            UF = uF;
+            NomeEstacaoOriginal = nomeEstacaoOriginal;
+            Latitude = latitude;
+            Longitude = longitude;
+            DataHora = dataHora;
+            ValorMedida = valorMedida;
+            Hora = hora;
+            Dia = dia;
+            Minuto = minuto;
+            Mes = mes;
+            Ano = ano;
+            DataHoraAjustada = dataHoraAjustada;
+            Estado = estado;
+            Bairro = bairro;
+            Cidade = cidade;
+        }
     }
 }
