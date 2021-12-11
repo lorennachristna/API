@@ -1,6 +1,6 @@
 ﻿using Nest;
 
-namespace Pluviometrico.Data.DatabaseContext
+namespace Pluviometrico.Data
 {
     public class MeasuredRainfallRuntimeFields
     {
