@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Pluviometrico.Data
 {
+    //TODO: Either make NEST accept C# DateTime or leave datahora and datahoraajustada as string
     [Table("dados_chuva_cemaden")] //para o PostgreSQL
     public class MeasuredRainfall
     {
@@ -37,7 +38,7 @@ namespace Pluviometrico.Data
 
         [PropertyName("datahora")]
         [Column("datahora")]
-        public DateTime DataHora { get; set; }
+        public string DataHora { get; set; }
 
         [PropertyName("valormedida")]
         [Column("valormedida")]
@@ -65,7 +66,7 @@ namespace Pluviometrico.Data
 
         [PropertyName("datahora_ajustada")]
         [Column("datahora_ajustada")]
-        public DateTime DataHoraAjustada { get; set; }
+        public string DataHoraAjustada { get; set; }
 
         [PropertyName("estado")]
         [Column("estado")]
@@ -83,7 +84,7 @@ namespace Pluviometrico.Data
         {
         }
 
-        public MeasuredRainfall(int id, string municipio, string codEstacaoOriginal, string uF, string nomeEstacaoOriginal, double latitude, double longitude, DateTime dataHora, double valorMedida, int hora, int dia, int minuto, int mes, int ano, DateTime dataHoraAjustada, string estado, string bairro, string cidade)
+        public MeasuredRainfall(int id, string municipio, string codEstacaoOriginal, string uF, string nomeEstacaoOriginal, double latitude, double longitude, string dataHora, double valorMedida, int hora, int dia, int minuto, int mes, int ano, string dataHoraAjustada, string estado, string bairro, string cidade)
         {
             Id = id;
             Municipio = municipio;
