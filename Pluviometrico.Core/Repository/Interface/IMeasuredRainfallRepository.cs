@@ -10,7 +10,7 @@ namespace Pluviometrico.Core.Repository.Interface
         //1
         //Devolve todos os campos
         //Filtra por ano e mês
-        Task<List<MeasuredRainfall>> FilterByMonthAndYear(int month, int year);
+        Task<List<object>> FilterByMonthAndYear(int month, int year);
 
         //2
         //Devolve todos os campos

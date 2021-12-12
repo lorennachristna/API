@@ -21,9 +21,9 @@ namespace Pluviometrico.Core.Repository
         //TODO: Remove .Take
         //TODO: Add Classes for each response type? Like with fields Distance and Source.
         //TODO: Make distance calculation work
-        public Task<List<MeasuredRainfall>> FilterByMonthAndYear(int month, int year)
+        public Task<List<object>> FilterByMonthAndYear(int month, int year)
         {
-             return _context.MeasuredRainfallList.Where(m => m.Ano == year && m.Mes == month).Take(10).ToListAsync();
+             return _context.MeasuredRainfallList.Where(m => m.Ano == year && m.Mes == month).Select(m => (object) m).Take(10).ToListAsync();
         }
 
         public Task<List<object>> FilterByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)

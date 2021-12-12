@@ -18,7 +18,7 @@ namespace Pluviometrico.Core.Repository
         {
             _elasticClient = elasticClient;
         }
-        public async Task<List<MeasuredRainfall>> FilterByMonthAndYear(int month, int year)
+        public async Task<List<object>> FilterByMonthAndYear(int month, int year)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s =>
                 s.Query(q =>
@@ -31,7 +31,7 @@ namespace Pluviometrico.Core.Repository
                 )
             );
 
-            return response?.Documents?.ToList();
+            return response?.Documents?.Select(d => (object) d).ToList();
         }
 
         //TODO: Check if adding "distancia" field significantly slows response time"?
