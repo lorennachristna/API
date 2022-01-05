@@ -7,10 +7,30 @@ namespace Pluviometrico.Core.Repository.Interface
 {
     public interface IMeasuredRainfallRepository
     {
-        //1
+        //Consulta 1
         //Devolve todos os campos
         //Filtra por ano e mês
-        Task<List<object>> FilterByMonthAndYear(int month, int year);
+        Task<List<object>> FilterByYear(int year);
+
+        //Consultas 2 e 3
+        //Devolve todos os campos
+        //Filtra por índice pluviométrico
+        Task<List<object>> FilterByRainfallIndex(double index);
+
+        //Consulta 4
+        //Devolve todos os campos e a distância calculada
+        //Filtra por distância
+        Task<List<object>> FilterByDistance(double distance);
+
+        //Consulta 5
+        //Devolve todos os campos e a distância calculada
+        //Filtra por distância
+        Task<List<object>> FilterByDistanceAndRainfallIndex(double distance, double index);
+
+        //Consulta 6
+        //Devolve todos os campos e a distância calculada
+        //Filtra por distância, ano, mês, dia
+        Task<List<object>> FilterByDistanceAndDate(double distance, int year, int month, int day);
 
         //2
         //Devolve todos os campos
@@ -44,11 +64,6 @@ namespace Pluviometrico.Core.Repository.Interface
         //7
         //Devolve todos os campos
         Task<List<MeasuredRainfall>> GetAll();
-
-        //8
-        //Devolve todos os campos e a distância calculada
-        //Filtra por distância
-        Task<List<object>> FilterByDistance(double distance);
 
         //9
         //Devolve todos os campos e a distância calculada

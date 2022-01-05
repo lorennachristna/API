@@ -9,22 +9,21 @@ using System.Threading.Tasks;
 
 namespace Pluviometrico.Core.Repository
 {
-    public class MeasuredRainfallRepository : IMeasuredRainfallRepository
+    public class MeasuredRainfallRepositoryES : IMeasuredRainfallRepository
     {
         private readonly IElasticClient _elasticClient;
         private readonly string _distanceCalculationString = "6371 * Math.acos(Math.cos(-22.9060000000000*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.0530000000000*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.9060000000000*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
 
-        public MeasuredRainfallRepository(IElasticClient elasticClient)
+        public MeasuredRainfallRepositoryES(IElasticClient elasticClient)
         {
             _elasticClient = elasticClient;
         }
-        public async Task<List<object>> FilterByMonthAndYear(int month, int year)
+        public async Task<List<object>> FilterByYear(int year)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s =>
                 s.Query(q =>
                     q.Bool(b => 
                         b.Must(m =>
-                            m.Term(t => t.Field(f => f.Mes).Value(month)) &&
                             m.Term(t => t.Field(f => f.Ano).Value(year))
                         )
                     )
@@ -32,6 +31,112 @@ namespace Pluviometrico.Core.Repository
             );
 
             return response?.Documents?.Select(d => (object) d).ToList();
+        }
+
+        public async Task<List<object>> FilterByRainfallIndex(double index)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s =>
+                s.Query(q =>
+                    q.Bool(b =>
+                        b.Must(m =>
+                            m.Range(r => r.Field(f => f.ValorMedida).GreaterThan(index))
+                        )
+                    )
+                )
+            );
+
+            return response?.Documents?.Select(d => (object)d).ToList();
+        }
+
+        public async Task<List<object>> FilterByDistance(double distance)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(s => s.ScriptField("distancia", script => script
+                    .Source(_distanceCalculationString)
+                ))
+                .Query(q => q
+                    .Bool(b => b
+                        .Filter(f => f
+                            .Script(s => s
+                                .Script(s => s
+                                    .Source($"double distancia = {_distanceCalculationString}; return distancia < {distance};"))))))
+            );
+            var filteredResponse = new List<object>();
+
+            foreach (var hit in response?.Hits)
+            {
+                filteredResponse.Add(new
+                {
+                    source = hit.Source,
+                    distancia = hit.Fields.Value<double>("distancia")
+                });
+            }
+
+            return filteredResponse;
+        }
+
+        public async Task<List<object>> FilterByDistanceAndRainfallIndex(double distance, double index)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(s => s.ScriptField("distancia", script => script
+                    .Source(_distanceCalculationString)
+                ))
+                .Query(q => q
+                    .Bool(b => b
+                        .Filter(f => f
+                            .Script(s => s
+                                .Script(s => s
+                                    .Source($"double distancia = {_distanceCalculationString}; return distancia > {distance};"))))
+                        .Must(m => m.Range(r => r.Field(f => f.ValorMedida).LessThan(index)))
+                        ))
+            );
+            var filteredResponse = new List<object>();
+
+            foreach (var hit in response?.Hits)
+            {
+                filteredResponse.Add(new
+                {
+                    source = hit.Source,
+                    distancia = hit.Fields.Value<double>("distancia")
+                });
+            }
+
+            return filteredResponse;
+        }
+
+        public async Task<List<object>> FilterByDistanceAndDate(double distance, int year, int month, int day)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(s => s.ScriptField("distancia", script => script
+                    .Source(_distanceCalculationString)
+                ))
+                .Query(q => q
+                    .Bool(b => b
+                        .Filter(f => f
+                            .Script(s => s
+                                .Script(s => s
+                                    .Source($"double distancia = {_distanceCalculationString}; return distancia < {distance};"))))
+                        .Must(m => 
+                            m.Term(t => t.Field(f => f.Ano).Value(year)) &&
+                            m.Term(t => t.Field(f => f.Mes).Value(month)) &&
+                            m.Term(t => t.Field(f => f.Dia).Value(day))
+                        )))
+            );
+            var filteredResponse = new List<object>();
+
+            foreach (var hit in response?.Hits)
+            {
+                filteredResponse.Add(new
+                {
+                    source = hit.Source,
+                    distancia = hit.Fields.Value<double>("distancia")
+                });
+            }
+
+            return filteredResponse;
         }
 
         //TODO: Check if adding "distancia" field significantly slows response time"?
@@ -279,33 +384,6 @@ namespace Pluviometrico.Core.Repository
             return response.Documents.ToList();
         }
 
-        public async Task<List<object>> FilterByDistance(double distance)
-        {
-            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
-                .Source(true)
-                .ScriptFields(s => s.ScriptField("distancia", script => script
-                    .Source(_distanceCalculationString)
-                ))
-                .Query(q => q
-                    .Bool(b => b
-                        .Filter(f => f
-                            .Script(s => s
-                                .Script(s => s
-                                    .Source($"double distancia = {_distanceCalculationString}; return distancia < {distance};"))))))
-            );
-            var filteredResponse = new List<object>();
-
-            foreach (var hit in response?.Hits)
-            {
-                filteredResponse.Add(new
-                {
-                    source = hit.Source,
-                    distancia = hit.Fields.Value<double>("distancia")
-                });
-            }
-
-            return filteredResponse;
-        }
 
         public async Task<List<object>> GetAllWithDistance()
         {

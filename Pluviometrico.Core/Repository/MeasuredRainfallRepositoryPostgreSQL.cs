@@ -20,11 +20,85 @@ namespace Pluviometrico.Core.Repository
 
         //TODO: Remove .Take
         //TODO: Add Classes for each response type? Like with fields Distance and Source.
-        //TODO: Make distance calculation work
-        public Task<List<object>> FilterByMonthAndYear(int month, int year)
+        //TODO: Make distance calculation function work
+        public Task<List<object>> FilterByYear(int year)
         {
-             return _context.MeasuredRainfallList.Where(m => m.Ano == year && m.Mes == month).Select(m => (object) m).Take(10).ToListAsync();
+             return _context.MeasuredRainfallList.Where(m => m.Ano == year).Select(m => (object) m).Take(10).ToListAsync();
         }
+
+        public Task<List<object>> FilterByRainfallIndex(double index)
+        {
+            return _context.MeasuredRainfallList.Where(m => m.ValorMedida > index).Select(m => (object)m).Take(10).ToListAsync();
+        }
+
+        public Task<List<object>> FilterByDistance(double distance)
+        {
+            var response = _context.MeasuredRainfallList
+                .Select(m =>
+                    new {
+                        Source = m,
+                        Distancia = 6371 *
+                            Math.Acos(
+                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Sin((Math.PI / 180) * (m.Latitude))
+                            )
+                    }
+                )
+                .Where(s => s.Distancia < distance)
+                .Select(w => (object)w);
+
+            return response.Take(10).ToListAsync();
+        }
+
+        public Task<List<object>> FilterByDistanceAndRainfallIndex(double distance, double index)
+        {
+            var response = _context.MeasuredRainfallList
+                .Where(m => m.ValorMedida > index)
+                .Select(m =>
+                    new {
+                        Source = m,
+                        Distancia = 6371 *
+                            Math.Acos(
+                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Sin((Math.PI / 180) * (m.Latitude))
+                            )
+                    }
+                )
+                .Where(s => s.Distancia < distance)
+                .Select(w => (object)w);
+
+            return response.Take(10).ToListAsync();
+        }
+
+        public Task<List<object>> FilterByDistanceAndDate(double distance, int year, int month, int day)
+        {
+            var response = _context.MeasuredRainfallList
+                .Where(m => 
+                    m.Ano == year &&
+                    m.Mes == month &&
+                    m.Dia == day)
+                .Select(m =>
+                    new {
+                        Source = m,
+                        Distancia = 6371 *
+                            Math.Acos(
+                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Sin((Math.PI / 180) * (m.Latitude))
+                            )
+                    }
+                )
+                .Where(s => s.Distancia < distance)
+                .Select(w => (object)w);
+
+            return response.Take(10).ToListAsync();
+        }
+
 
         public Task<List<object>> FilterByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
         {
@@ -156,27 +230,6 @@ namespace Pluviometrico.Core.Repository
         public Task<List<MeasuredRainfall>> GetAll()
         {
             return _context.MeasuredRainfallList.Take(10).ToListAsync();
-        }
-
-        public Task<List<object>> FilterByDistance(double distance)
-        {
-            var response = _context.MeasuredRainfallList
-                .Select(m =>
-                    new {
-                        Source = m,
-                        Distancia = 6371 *
-                            Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
-                                Math.Sin((Math.PI / 180) * (m.Latitude))
-                            )
-                    }
-                )
-                .Where(s => s.Distancia < distance)
-                .Select(w => (object) w);
-
-            return response.Take(10).ToListAsync();
         }
 
         public Task<List<object>> GetAllWithDistance()

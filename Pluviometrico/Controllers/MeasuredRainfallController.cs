@@ -21,10 +21,38 @@ namespace Pluviometrico.Controllers
         //TODO: padronizar controller
         //TODO: paging
         //TODO: DTOs
-        [HttpGet("{month:int}/{year:int}")]
-        public async Task<IActionResult> GetByDate(int month, int year)
+        [HttpGet("ano/{year:int}")]
+        public async Task<IActionResult> GetByDate(int year)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByMonthAndYear(month, year);
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByYear(year);
+            return Ok(response);
+        }
+
+        [HttpGet("indice/{index:int}")]
+        public async Task<IActionResult> GetByRainfallIndex(int index)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByRainfallIndex(index);
+            return Ok(response);
+        }
+
+        [HttpGet("distancia")]
+        public async Task<IActionResult> FilterByDistance([FromQuery] double distance)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistance(distance);
+            return Ok(response);
+        }
+
+        [HttpGet("distancia/indice")]
+        public async Task<IActionResult> FilterByDistanceAndRainfallIndex([FromQuery] double distance, [FromQuery] double index)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndRainfallIndex(distance, index);
+            return Ok(response);
+        }
+
+        [HttpGet("distancia/data")]
+        public async Task<IActionResult> FilterByDistanceAndDate([FromQuery] double distance, [FromQuery] int year, [FromQuery] int month, [FromQuery] int day)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndDate(distance, year, month, day);
             return Ok(response);
         }
 
@@ -71,12 +99,7 @@ namespace Pluviometrico.Controllers
             return Ok(response);
         }
 
-        [HttpGet("filtro/distancia")]
-        public async Task<IActionResult> FilterByDistance([FromQuery] double distance)
-        {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistance(distance);
-            return Ok(response);
-        }
+
         [HttpGet("todos/distancia")]
         public async Task<IActionResult> GetAllWithDistance()
         {
@@ -98,7 +121,7 @@ namespace Pluviometrico.Controllers
             return Ok(response);
         }
 
-        [HttpGet("distancia")]
+        [HttpGet("distancia/agrupado-por-cidade")]
         public async Task<IActionResult> GetValueByDistance([FromQuery] double distance)
         {
             var response = await _unitOfWork.MeasuredRainfallList.GetMeasureByCityAndDateFilterByDistance(distance);

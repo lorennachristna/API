@@ -19,15 +19,101 @@ namespace Pluviometrico.Core.Repository
             _context = context;
         }
 
-        public async Task<List<object>> FilterByMonthAndYear(int month, int year)
+        public async Task<List<object>> FilterByYear(int year)
         {
             var response = _context.FactRainList
                 .Include(f => f.Time)
-                .Where(f => f.Time.Month == month.ToString() && f.Time.Year == year.ToString());
+                .Include(f => f.Location)
+                .Include(f => f.Source)
+                .Include(f => f.Station)
+                .Where(f => f.Time.Year == year.ToString());
 
             var facts = await response.Take(10).Select(fact => (object) fact).ToListAsync();
 
             return facts;
+        }
+
+        public async Task<List<object>> FilterByRainfallIndex(double index)
+        {
+            var response = _context.FactRainList
+                .Include(f => f.Time)
+                .Include(f => f.Location)
+                .Include(f => f.Source)
+                .Include(f => f.Station)
+                .Where(f => f.RainfallIndex > index);
+
+            var facts = await response.Take(10).Select(fact => (object)fact).ToListAsync();
+
+            return facts;
+        }
+
+        public Task<List<object>> FilterByDistance(double distance)
+        {
+            var response = _context.FactRainList
+                .Include(f => f.Location)
+                .Select(f => new {
+                    Source = f,
+                    Distance = 6371 *
+                            Math.Acos(
+                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (f.Location.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Sin((Math.PI / 180) * (f.Location.Latitude))
+                            )
+                })
+                .Where(s => s.Distance < distance)
+                .Select(w => (object)w);
+
+            return response.Take(10).ToListAsync();
+
+        }
+
+        public Task<List<object>> FilterByDistanceAndRainfallIndex(double distance, double index)
+        {
+            var response = _context.FactRainList
+                .Include(f => f.Location)
+                .Where(f => f.RainfallIndex > index)
+                .Select(f => new {
+                    Source = f,
+                    Distance = 6371 *
+                            Math.Acos(
+                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (f.Location.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Sin((Math.PI / 180) * (f.Location.Latitude))
+                            )
+                })
+                .Where(s => s.Distance < distance)
+                .Select(w => (object) w);
+
+            return response.Take(10).ToListAsync();
+
+        }
+
+        public Task<List<object>> FilterByDistanceAndDate(double distance, int year, int month, int day)
+        {
+            var response = _context.FactRainList
+                .Include(f => f.Location)
+                .Include(f => f.Time)
+                .Where(f => 
+                    f.Time.Year == year.ToString() &&
+                    f.Time.Month == month.ToString() &&
+                    f.Time.Day == day.ToString())
+                .Select(f => new {
+                    Source = f,
+                    Distance = 6371 *
+                            Math.Acos(
+                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (f.Location.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Sin((Math.PI / 180) * (f.Location.Latitude))
+                            )
+                })
+                .Where(s => s.Distance < distance)
+                .Select(w => (object)w);
+
+            return response.Take(10).ToListAsync();
+
         }
 
         public Task<List<object>> FilterByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
@@ -184,26 +270,6 @@ namespace Pluviometrico.Core.Repository
             return ConvertToMeasuredRainfallList(facts);
         }
 
-        public Task<List<object>> FilterByDistance(double distance)
-        {
-            var response = _context.FactRainList
-                .Include(f => f.Location)
-                .Select(f => new {
-                    Source = f,
-                    Distance = 6371 *
-                            Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (f.Location.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
-                                Math.Sin((Math.PI / 180) * (f.Location.Latitude))
-                            )
-                })
-                .Where(s => s.Distance < distance)
-                .Select(w => (object) w);
-
-            return response.Take(10).ToListAsync();
-
-        }
 
         public Task<List<object>> GetAllWithDistance()
         {
@@ -313,14 +379,14 @@ namespace Pluviometrico.Core.Repository
                         fact.Station.StationName,
                         fact.Location.Latitude,
                         fact.Location.Longitude,
-                        dateTime.ToString(),
+                        dateTime,
                         fact.RainfallIndex,
                         int.Parse(fact.Time.Hour),
                         int.Parse(fact.Time.Day),
                         int.Parse(fact.Time.Minute),
                         int.Parse(fact.Time.Month),
                         int.Parse(fact.Time.Year),
-                        dateTime.ToString(),
+                        dateTime,
                         fact.Location.State,
                         fact.Location.NeighborHood,
                         fact.Location.City
