@@ -13,7 +13,7 @@ namespace Pluviometrico.Core.Repository
     public class MeasuredRainfallRepositoryDW : IMeasuredRainfallRepository
     {
         private readonly DWContext _context;
-        
+
         public MeasuredRainfallRepositoryDW(DWContext context)
         {
             _context = context;
@@ -26,7 +26,7 @@ namespace Pluviometrico.Core.Repository
                 .Include(f => f.Location)
                 .Include(f => f.Source)
                 .Include(f => f.Station)
-                .Where(f => f.Time.Year == year.ToString());
+                .Where(f => f.Time.Year == year);
 
             var facts = await response.Take(10).Select(fact => (object) fact).ToListAsync();
 
@@ -96,9 +96,9 @@ namespace Pluviometrico.Core.Repository
                 .Include(f => f.Location)
                 .Include(f => f.Time)
                 .Where(f => 
-                    f.Time.Year == year.ToString() &&
-                    f.Time.Month == month.ToString() &&
-                    f.Time.Day == day.ToString())
+                    f.Time.Year == year &&
+                    f.Time.Month == month &&
+                    f.Time.Day == day)
                 .Select(f => new {
                     Source = f,
                     Distance = 6371 *
@@ -116,13 +116,75 @@ namespace Pluviometrico.Core.Repository
 
         }
 
+        public Task<List<object>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance)
+        {
+            var dates = Utils.MaxMinDate(firstDate, secondDate);
+
+            var response = _context.FactRainList
+                .Include(f => f.Location)
+                .Include(f => f.Source)
+                .Include(f => f.Station)
+                .Include(f => f.Time)
+                .Select(f =>
+                    new
+                    {
+                        Source = f,
+                        Distance = 6371 *
+                        Math.Acos(
+                            Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
+                            Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (f.Location.Longitude)) +
+                            Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                            Math.Sin((Math.PI / 180) * (f.Location.Latitude))),
+                        Data = new DateTime(f.Time.Year, f.Time.Month, f.Time.Day)
+                    })
+                .Where(s =>
+                    s.Distance < distance &&
+                    s.Data <= dates.greaterDate &&
+                    s.Data >= dates.lesserDate
+                );
+
+            return response.Select(w => (object)w).Take(10).ToListAsync();
+        }
+
+        public Task<List<object>> FilterByDistanceAndCity(double distance, string city)
+        {
+            var response = _context.FactRainList
+                .Include(f => f.Location)
+                .Include(f => f.Source)
+                .Include(f => f.Station)
+                .Include(f => f.Time)
+                .Select(f =>
+                    new
+                    {
+                        Source = f,
+                        Distance = 6371 *
+                        Math.Acos(
+                            Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
+                            Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (f.Location.Longitude)) +
+                            Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                            Math.Sin((Math.PI / 180) * (f.Location.Latitude)))
+                    })
+                .Where(s =>
+                    s.Distance < distance &&
+                    s.Source.Location.Town == city
+                );
+            return response.Select(w => (object)w).Take(10).ToListAsync();
+        }
+
+
+
+
+
+
+
+
         public Task<List<object>> FilterByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
         {
-            var yearRange = new List<string>();
+            var yearRange = new List<int>();
 
             for (int i = greaterThanYear; i <= lessThanYear; i++)
             {
-                yearRange.Add(i.ToString());
+                yearRange.Add(i);
             }
 
             var response = _context.FactRainList
@@ -153,7 +215,7 @@ namespace Pluviometrico.Core.Repository
             var response = _context.FactRainList
                 .Include(f => f.Location)
                 .Include(f => f.Time)
-                .Where(f => f.Time.Year == year.ToString())
+                .Where(f => f.Time.Year == year)
                 .Select(f => new
                 {
                     Source = f,
@@ -173,14 +235,13 @@ namespace Pluviometrico.Core.Repository
             return response.Take(10).ToListAsync();
         }
 
-        
         //TODO: Verificar se ano e mês devem ser string ou int
         public Task<List<object>> GetMeasureByCityFilterByDate(int year)
         {
             var response = _context.FactRainList
                 .Include(f => f.Location)
                 .Include(f => f.Time)
-                .Where(f => f.Time.Year == year.ToString())
+                .Where(f => f.Time.Year == year)
                 .GroupBy(f => new { f.Location.Town, f.Time.Month, f.Time.Year})
                 .Select(g => (object) new { 
                     g.Key.Town, 
@@ -197,7 +258,7 @@ namespace Pluviometrico.Core.Repository
             var response = _context.FactRainList
                 .Include(f => f.Location)
                 .Include(f => f.Time)
-                .Where(f => f.Time.Year == year.ToString())
+                .Where(f => f.Time.Year == year)
                 .GroupBy(f => new
                 {
                     f.Location.Town,
@@ -227,7 +288,7 @@ namespace Pluviometrico.Core.Repository
                 .Include(f => f.Location)
                 .Include(f => f.Time)
                 .Include(f => f.Station)
-                .Where(f => f.Time.Year == year.ToString() && f.Time.Month == month.ToString())
+                .Where(f => f.Time.Year == year && f.Time.Month == month)
                 .GroupBy(f => new
                 {
                     f.Station.StationCode,
@@ -303,7 +364,8 @@ namespace Pluviometrico.Core.Repository
                     Sum = g.Sum(f => f.RainfallIndex)
                 });
 
-            return response.ToListAsync();        }
+            return response.ToListAsync();
+        }
 
         public Task<List<object>> GetMeasureByCityAndYearFilterByDistance(double distance)
         {
@@ -369,10 +431,9 @@ namespace Pluviometrico.Core.Repository
             var result = new List<MeasuredRainfall>();
             foreach (var fact in facts)
             {
-                var dateTime = new DateTime(int.Parse(fact.Time.Year), int.Parse(fact.Time.Month), int.Parse(fact.Time.Day), int.Parse(fact.Time.Hour), int.Parse(fact.Time.Minute), 0);
+                var dateTime = new DateTime(fact.Time.Year, fact.Time.Month, fact.Time.Day);
 
                 result.Add(new MeasuredRainfall(
-                        fact.Id,
                         fact.Location.Town,
                         fact.Station.StationCode,
                         fact.Location.UF,
@@ -381,11 +442,10 @@ namespace Pluviometrico.Core.Repository
                         fact.Location.Longitude,
                         dateTime,
                         fact.RainfallIndex,
-                        int.Parse(fact.Time.Hour),
-                        int.Parse(fact.Time.Day),
-                        int.Parse(fact.Time.Minute),
-                        int.Parse(fact.Time.Month),
-                        int.Parse(fact.Time.Year),
+                        fact.Time.Hour,
+                        fact.Time.Day,
+                        fact.Time.Month,
+                        fact.Time.Year,
                         dateTime,
                         fact.Location.State,
                         fact.Location.NeighborHood,

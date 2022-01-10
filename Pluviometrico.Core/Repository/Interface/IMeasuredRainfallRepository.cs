@@ -1,5 +1,5 @@
-﻿using Nest;
-using Pluviometrico.Data;
+﻿using Pluviometrico.Data;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -31,6 +31,27 @@ namespace Pluviometrico.Core.Repository.Interface
         //Devolve todos os campos e a distância calculada
         //Filtra por distância, ano, mês, dia
         Task<List<object>> FilterByDistanceAndDate(double distance, int year, int month, int day);
+
+        //Consulta 7
+        //Devolve todos os campos e a distância calculada
+        //Filtra por distância e intervalo de datas
+        Task<List<object>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance);
+
+        //Consulta 7
+        //Devolve todos os campos e a distância calculada
+        //Filtra por distância e cidade
+        Task<List<object>> FilterByDistanceAndCity(double distance, string city);
+
+
+
+
+
+
+
+
+
+
+
 
         //2
         //Devolve todos os campos

@@ -84,9 +84,8 @@ namespace Pluviometrico.Data
         {
         }
 
-        public MeasuredRainfall(int id, string municipio, string codEstacaoOriginal, string uF, string nomeEstacaoOriginal, double latitude, double longitude, DateTime dataHora, double valorMedida, int hora, int dia, int minuto, int mes, int ano, DateTime dataHoraAjustada, string estado, string bairro, string cidade)
+        public MeasuredRainfall(string municipio, string codEstacaoOriginal, string uF, string nomeEstacaoOriginal, double latitude, double longitude, DateTime dataHora, double valorMedida, int hora, int dia, int mes, int ano, DateTime dataHoraAjustada, string estado, string bairro, string cidade)
         {
-            Id = id;
             Municipio = municipio;
             CodEstacaoOriginal = codEstacaoOriginal;
             UF = uF;
@@ -97,7 +96,6 @@ namespace Pluviometrico.Data
             ValorMedida = valorMedida;
             Hora = hora;
             Dia = dia;
-            Minuto = minuto;
             Mes = mes;
             Ano = ano;
             DataHoraAjustada = dataHoraAjustada;

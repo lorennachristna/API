@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Pluviometrico.Core.Repository.Interface;
-using Pluviometrico.Data;
+using System;
 using System.Threading.Tasks;
 
 namespace Pluviometrico.Controllers
@@ -56,6 +56,22 @@ namespace Pluviometrico.Controllers
             return Ok(response);
         }
 
+        [HttpGet("distancia/data-intervalo")]
+        public async Task<IActionResult> FilterByDistanceAndDateRange([FromQuery] double distance, [FromQuery] DateTime firstDate, [FromQuery] DateTime secondDate)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndDateRange(firstDate, secondDate, distance);
+            return Ok(response);
+        }
+
+        [HttpGet("distancia/cidade")]
+        public async Task<IActionResult> FilterByDistanceAndCity([FromQuery] double distance, [FromQuery] string city)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndCity(distance, city);
+            return Ok(response);
+        }
+
+
+
         [HttpGet("{greaterThanYear:int}/{lessThanYear:int}/{distance:double}")]
         public async Task<IActionResult> GetByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
         {
@@ -88,7 +104,7 @@ namespace Pluviometrico.Controllers
         [HttpGet("valormedida/estacao/distancia/ano")]
         public async Task<IActionResult> GetSumValueGroupByStation([FromQuery] int year, [FromQuery] double distance)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetAverageMeasureByCityAndStationFilterByDateAndDistance(year, distance,7);
+            var response = await _unitOfWork.MeasuredRainfallList.GetAverageMeasureByCityAndStationFilterByDateAndDistance(year, distance, 7);
             return Ok(response);
         }
 

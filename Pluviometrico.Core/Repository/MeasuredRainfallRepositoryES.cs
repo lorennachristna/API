@@ -1,7 +1,6 @@
 ﻿using Nest;
 using Pluviometrico.Core.Repository.Interface;
 using Pluviometrico.Data;
-using Pluviometrico.Data.DatabaseContext;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -164,6 +163,71 @@ namespace Pluviometrico.Core.Repository
             }
             return filteredResponse;
         }
+
+        public async Task<List<object>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance)
+        {
+            var dates = Utils.MaxMinDate(firstDate, secondDate);
+
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(sf => sf
+                    .ScriptField("distancia", script => script
+                        .Source(_distanceCalculationString)))
+                .Query(q => q.Bool(b => b
+                    .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {_distanceCalculationString} ; return distancia < {distance};"))))
+                    .Must(m => m.DateRange(r => r.Field(f => f.DataHora).GreaterThanOrEquals(DateMath.Anchored(dates.lesserDate)).LessThanOrEquals(DateMath.Anchored(dates.greaterDate)))))
+            ));
+
+            var filteredResponse = new List<object>();
+
+            foreach (var h in response?.Hits)
+            {
+                filteredResponse.Add(new
+                {
+                    Source = h.Source,
+                    Distancia = h.Fields.Value<double>("distancia")
+                });
+            }
+            return filteredResponse;
+        }
+
+        public async Task<List<object>> FilterByDistanceAndCity(double distance, string city)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(sf =>
+                    sf.ScriptField("distancia", script => script
+                        .Source(_distanceCalculationString)))
+                .Query(q =>
+                    q.Bool(b => b
+                        .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {_distanceCalculationString} ; return distancia < {distance};"))))
+                        .Must(m => m.Match(t => t.Field(f => f.Municipio).Query(city))))));
+
+            var filteredResponse = new HashSet<object>();
+
+            foreach (var h in response?.Hits)
+            {
+                filteredResponse.Add(Utils.FormattedResponse(h.Source, h.Fields.Value<double>("distancia")));
+            }
+            return filteredResponse.ToList();
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         public async Task<List<object>> FilterByDistanceAndYear(int year, double distance)
         {
@@ -370,7 +434,6 @@ namespace Pluviometrico.Core.Repository
 
                         }
 
-                        
                     }
                 }
             }
@@ -492,7 +555,7 @@ namespace Pluviometrico.Core.Repository
 
             return filteredResponse;
         }
-        
+
         public async Task<List<object>> GetMeasureByCityAndDateFilterByDistance(double distance)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
