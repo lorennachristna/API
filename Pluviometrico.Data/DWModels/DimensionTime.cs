@@ -5,23 +5,25 @@ namespace Pluviometrico.Data.DWModels
     [Table("dimensao_tempo")]
     public class DimensionTime
     {
-        [Column("id_dimensao_tempo")]
+        [Column("id_tempo")]
         public int Id { get; set; }
 
         [Column("ano")]
-        public string Year { get; set; }
+        public int Year { get; set; }
 
         [Column("mes")]
-        public string Month { get; set; }
+        public int Month { get; set; }
 
         [Column("dia")]
-        public string Day { get; set; }
+        public int Day { get; set; }
 
         [Column("hora")]
-        public string Hour { get; set; }
+        public int Hour { get; set; }
 
-        [Column("minuto")]
-        public string Minute { get; set; }
+        [Column("semestre")]
+        public int Semester { get; set; }
 
+        [Column("semana")]
+        public int Week { get; set; }
     }
 }

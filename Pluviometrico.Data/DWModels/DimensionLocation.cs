@@ -5,7 +5,7 @@ namespace Pluviometrico.Data.DWModels
     [Table("dim_localidade_cemaden")]
     public class DimensionLocation
     {
-        [Column("id_dimensao_localidade")]
+        [Column("id")]
         public int Id { get; set; }
 
         [Column("bairro")]
@@ -14,7 +14,7 @@ namespace Pluviometrico.Data.DWModels
         [Column("latitude")]
         public double Latitude { get; set; }
 
-        [Column("longitude")]
+        [Column("long")]
         public double Longitude { get; set; }
 
         [Column("cidade")]

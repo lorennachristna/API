@@ -2,10 +2,10 @@
 
 namespace Pluviometrico.Data.DWModels
 {
-    [Table("dimensao_fonte")]
+    [Table("dim_fonte")]
     public class DimensionSource
     {
-        [Column("id_dimensao_fonte")]
+        [Column("id")]
         public int Id { get; set; }
 
         [Column("fonte")]

@@ -2,12 +2,9 @@
 
 namespace Pluviometrico.Data.DWModels
 {
-    [Table("fato_chuva")]
+    [Table("fato_chuva_cemaden")]
     public class FactRain
-    {
-        [Column("id_indice_pluviometrico")]
-        public int Id { get; set; }
-        
+    {   
         [Column("id_fonte")]
         [ForeignKey(nameof(DimensionSource))]
         public int SourceId { get; set; }
