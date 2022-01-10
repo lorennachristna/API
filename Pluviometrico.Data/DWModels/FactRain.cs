@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Pluviometrico.Data.DWModels
 {
     [Table("fato_chuva_cemaden")]
+    [Keyless]
     public class FactRain
     {   
         [Column("id_fonte")]
@@ -21,7 +23,7 @@ namespace Pluviometrico.Data.DWModels
         [ForeignKey(nameof(DimensionStation))]
         public int StationId { get; set; }
 
-        [Column("indice_pluviometrico")]
+        [Column("indice_pluv")]
         public double RainfallIndex { get; set; }
 
         //Properties that facilitates querying, but are not on the database (relative to foreign keys)
