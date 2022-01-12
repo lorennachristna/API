@@ -191,7 +191,7 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse;
         }
 
-        public async Task<List<object>> FilterByDistanceAndCity(double distance, string city)
+        public async Task<List<object>> FilterByDistanceAndCity(double distance, string city, int limit)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Source(true)
@@ -200,7 +200,7 @@ namespace Pluviometrico.Core.Repository
                         .Source(_distanceCalculationString)))
                 .Query(q =>
                     q.Bool(b => b
-                        .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {_distanceCalculationString} ; return distancia < {distance};"))))
+                        .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {_distanceCalculationString} ; return distancia > {distance};"))))
                         .Must(m => m.Match(t => t.Field(f => f.Municipio).Query(city))))));
 
             var filteredResponse = new HashSet<object>();
@@ -209,7 +209,7 @@ namespace Pluviometrico.Core.Repository
             {
                 filteredResponse.Add(Utils.FormattedResponse(h.Source, h.Fields.Value<double>("distancia")));
             }
-            return filteredResponse.ToList();
+            return filteredResponse.Take(limit).ToList();
 
         }
 

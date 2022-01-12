@@ -64,9 +64,9 @@ namespace Pluviometrico.Controllers
         }
 
         [HttpGet("distancia/cidade")]
-        public async Task<IActionResult> FilterByDistanceAndCity([FromQuery] double distance, [FromQuery] string city)
+        public async Task<IActionResult> FilterByDistanceAndCity([FromQuery] double distance, [FromQuery] string city, [FromQuery] int limit)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndCity(distance, city);
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndCity(distance, city, limit);
             return Ok(response);
         }
 

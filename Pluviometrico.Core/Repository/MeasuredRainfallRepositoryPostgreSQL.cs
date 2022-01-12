@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Pluviometrico.Core.DTOs;
 using Pluviometrico.Core.Repository.Interface;
 using Pluviometrico.Data;
 using Pluviometrico.Data.DatabaseContext;
@@ -125,14 +126,18 @@ namespace Pluviometrico.Core.Repository
             return response.Select(r => (object)r).Take(10).ToListAsync();
         }
 
-        public Task<List<object>> FilterByDistanceAndCity(double distance, string city)
+        public async Task<List<object>> FilterByDistanceAndCity(double distance, string city, int limit)
         {
-            var response = _context.MeasuredRainfallList
+            var response = await _context.MeasuredRainfallList
                 .Select(m =>
-                    new
+                    new MeasuredRainfallDTO
                     {
-                        Source = m,
-                        Distancia = 6371 *
+                        Source = "CEMADEN",
+                        City = m.Municipio,
+                        UF = m.UF,
+                        StationCode = m.CodEstacaoOriginal,
+                        StationName = m.NomeEstacaoOriginal,
+                        Distance = 6371 *
                             Math.Acos(
                                 Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
                                 Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
@@ -140,11 +145,11 @@ namespace Pluviometrico.Core.Repository
                                 Math.Sin((Math.PI / 180) * (m.Latitude))),
                     })
                 .Where(s =>
-                    s.Distancia < distance &&
-                    s.Source.Municipio == city
-                ).Select(w => Utils.FormattedResponse(w.Source, w.Distancia));
+                    s.Distance > distance &&
+                    s.City == city
+                ).Distinct().Take(limit).ToListAsync();
 
-            return response.Take(10).ToListAsync();
+            return  response.Select(r => (object)r).ToList();
         }
 
 

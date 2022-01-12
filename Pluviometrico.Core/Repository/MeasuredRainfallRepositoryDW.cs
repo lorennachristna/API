@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Pluviometrico.Core.DTOs;
 using Pluviometrico.Core.Repository.Interface;
 using Pluviometrico.Data;
 using Pluviometrico.Data.DatabaseContext;
@@ -146,17 +147,21 @@ namespace Pluviometrico.Core.Repository
             return response.Select(w => (object)w).Take(10).ToListAsync();
         }
 
-        public Task<List<object>> FilterByDistanceAndCity(double distance, string city)
+        public async Task<List<object>> FilterByDistanceAndCity(double distance, string city, int limit)
         {
-            var response = _context.FactRainList
+            var response = await _context.FactRainList
                 .Include(f => f.Location)
                 .Include(f => f.Source)
                 .Include(f => f.Station)
                 .Include(f => f.Time)
                 .Select(f =>
-                    new
+                    new MeasuredRainfallDTO
                     {
-                        Source = f,
+                        Source = f.Source.Source,
+                        City = f.Location.City,
+                        UF = f.Location.UF,
+                        StationCode = f.Station.StationCode,
+                        StationName = f.Station.StationName,
                         Distance = 6371 *
                         Math.Acos(
                             Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
@@ -165,10 +170,11 @@ namespace Pluviometrico.Core.Repository
                             Math.Sin((Math.PI / 180) * (f.Location.Latitude)))
                     })
                 .Where(s =>
-                    s.Distance < distance &&
-                    s.Source.Location.Town == city
-                );
-            return response.Select(w => (object)w).Take(10).ToListAsync();
+                    s.Distance > distance &&
+                    s.City == city
+                ).Distinct().Take(limit).ToListAsync();
+
+            return response.Select(s => (object)s).ToList();
         }
 
 
@@ -242,9 +248,9 @@ namespace Pluviometrico.Core.Repository
                 .Include(f => f.Location)
                 .Include(f => f.Time)
                 .Where(f => f.Time.Year == year)
-                .GroupBy(f => new { f.Location.Town, f.Time.Month, f.Time.Year})
+                .GroupBy(f => new { f.Location.City, f.Time.Month, f.Time.Year})
                 .Select(g => (object) new { 
-                    g.Key.Town, 
+                    g.Key.City, 
                     g.Key.Month, 
                     g.Key.Year, 
                     soma = g.Sum(f => f.RainfallIndex) }
@@ -261,7 +267,7 @@ namespace Pluviometrico.Core.Repository
                 .Where(f => f.Time.Year == year)
                 .GroupBy(f => new
                 {
-                    f.Location.Town,
+                    f.Location.City,
                     f.Time.Month,
                     Distance = 6371 *
                             Math.Acos(
@@ -273,7 +279,7 @@ namespace Pluviometrico.Core.Repository
                 })
                 .Where(g => g.Key.Distance < distance)
                 .Select(g => (object) new { 
-                    g.Key.Town,
+                    g.Key.City,
                     g.Key.Month,
                     g.Key.Distance
                 })
@@ -293,7 +299,7 @@ namespace Pluviometrico.Core.Repository
                 {
                     f.Station.StationCode,
                     f.Station.StationName,
-                    f.Location.Town,
+                    f.Location.City,
                     f.Time.Month,
                     f.Time.Year,
                     Distance = 6371 *
@@ -309,7 +315,7 @@ namespace Pluviometrico.Core.Repository
                 {
                     g.Key.StationCode,
                     g.Key.StationName,
-                    g.Key.Town,
+                    g.Key.City,
                     g.Key.Month,
                     g.Key.Year,
                     g.Key.Distance,
@@ -356,10 +362,10 @@ namespace Pluviometrico.Core.Repository
             var response = _context.FactRainList
                 .Include(f => f.Location)
                 .Include(f => f.Time)
-                .GroupBy(f => new { f.Location.Town, f.Time.Year })
+                .GroupBy(f => new { f.Location.City, f.Time.Year })
                 .Select(g => (object) new
                 {
-                    g.Key.Town,
+                    g.Key.City,
                     g.Key.Year,
                     Sum = g.Sum(f => f.RainfallIndex)
                 });
@@ -404,7 +410,7 @@ namespace Pluviometrico.Core.Repository
                 {
                     f.Time.Month,
                     f.Time.Year,
-                    f.Location.Town,
+                    f.Location.City,
                     Distance = 6371 *
                             Math.Acos(
                                 Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
@@ -418,7 +424,7 @@ namespace Pluviometrico.Core.Repository
                 {
                     g.Key.Month,
                     g.Key.Year,
-                    g.Key.Town,
+                    g.Key.City,
                     g.Key.Distance,
                     sum = g.Sum(f => f.RainfallIndex)
                 });
@@ -434,7 +440,7 @@ namespace Pluviometrico.Core.Repository
                 var dateTime = new DateTime(fact.Time.Year, fact.Time.Month, fact.Time.Day);
 
                 result.Add(new MeasuredRainfall(
-                        fact.Location.Town,
+                        fact.Location.City,
                         fact.Station.StationCode,
                         fact.Location.UF,
                         fact.Station.StationName,
@@ -448,9 +454,7 @@ namespace Pluviometrico.Core.Repository
                         fact.Time.Year,
                         dateTime,
                         fact.Location.State,
-                        fact.Location.NeighborHood,
-                        fact.Location.City
-                    ));
+                        fact.Location.NeighborHood));
             }
 
             return result;

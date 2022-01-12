@@ -37,10 +37,10 @@ namespace Pluviometrico.Core.Repository.Interface
         //Filtra por distância e intervalo de datas
         Task<List<object>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance);
 
-        //Consulta 7
+        //Consulta 8, 9 e 10
         //Devolve todos os campos e a distância calculada
-        //Filtra por distância e cidade
-        Task<List<object>> FilterByDistanceAndCity(double distance, string city);
+        //Filtra por distância e cidade, limitando a um número de registros
+        Task<List<object>> FilterByDistanceAndCity(double distance, string city, int limit);
 
 
 
