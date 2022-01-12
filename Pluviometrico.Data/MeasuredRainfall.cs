@@ -76,15 +76,11 @@ namespace Pluviometrico.Data
         [Column("bairro")]
         public string Bairro { get; set; }
 
-        [PropertyName("cidade")]
-        [Column("cidade")]
-        public string Cidade { get; set; }
-
         public MeasuredRainfall()
         {
         }
 
-        public MeasuredRainfall(string municipio, string codEstacaoOriginal, string uF, string nomeEstacaoOriginal, double latitude, double longitude, DateTime dataHora, double valorMedida, int hora, int dia, int mes, int ano, DateTime dataHoraAjustada, string estado, string bairro, string cidade)
+        public MeasuredRainfall(string municipio, string codEstacaoOriginal, string uF, string nomeEstacaoOriginal, double latitude, double longitude, DateTime dataHora, double valorMedida, int hora, int dia, int mes, int ano, DateTime dataHoraAjustada, string estado, string bairro)
         {
             Municipio = municipio;
             CodEstacaoOriginal = codEstacaoOriginal;
@@ -101,7 +97,6 @@ namespace Pluviometrico.Data
             DataHoraAjustada = dataHoraAjustada;
             Estado = estado;
             Bairro = bairro;
-            Cidade = cidade;
         }
     }
 }

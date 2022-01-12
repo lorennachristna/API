@@ -17,9 +17,6 @@ namespace Pluviometrico.Data.DWModels
         [Column("long")]
         public double Longitude { get; set; }
 
-        [Column("cidade")]
-        public string City { get; set; }
-
         [Column("estado")]
         public string State { get; set; }
 
@@ -27,6 +24,6 @@ namespace Pluviometrico.Data.DWModels
         public string UF { get; set; }
 
         [Column("municipio")]
-        public string Town { get; set; }
+        public string City { get; set; }
     }
 }
