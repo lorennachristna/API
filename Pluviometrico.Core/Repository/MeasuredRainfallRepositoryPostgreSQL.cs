@@ -40,9 +40,9 @@ namespace Pluviometrico.Core.Repository
                         Source = m,
                         Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
                     }
@@ -62,9 +62,9 @@ namespace Pluviometrico.Core.Repository
                         Source = m,
                         Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
                     }
@@ -87,9 +87,9 @@ namespace Pluviometrico.Core.Repository
                         Source = m,
                         Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
                     }
@@ -111,9 +111,9 @@ namespace Pluviometrico.Core.Repository
                         Source = m,
                         Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))),
                         Data = new DateTime(m.Ano, m.Mes, m.Dia)
                     })
@@ -139,9 +139,9 @@ namespace Pluviometrico.Core.Repository
                         StationName = m.NomeEstacaoOriginal,
                         Distance = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))),
                     })
                 .Where(s =>
@@ -168,9 +168,9 @@ namespace Pluviometrico.Core.Repository
                     Source = m,
                     Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude)))})
                 .Where(n =>
                     n.Distancia < distance &&
@@ -190,9 +190,9 @@ namespace Pluviometrico.Core.Repository
                         Source = m,
                         Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
                     }
@@ -230,9 +230,9 @@ namespace Pluviometrico.Core.Repository
                     m.Ano,
                     distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
                 })
@@ -262,9 +262,9 @@ namespace Pluviometrico.Core.Repository
                         m.Ano,
                         Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
                     }
@@ -300,9 +300,9 @@ namespace Pluviometrico.Core.Repository
                         Source = m,
                         Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
                     }
@@ -343,9 +343,9 @@ namespace Pluviometrico.Core.Repository
                         m.NomeEstacaoOriginal,
                         Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
                     })
@@ -374,9 +374,9 @@ namespace Pluviometrico.Core.Repository
                         m.Municipio,
                         Distancia = 6371 *
                             Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.9060000000000)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.0530000000000) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.9060000000000)) *
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
                                 Math.Sin((Math.PI / 180) * (m.Latitude))
                             )
                     })
@@ -400,9 +400,9 @@ namespace Pluviometrico.Core.Repository
 
             var response = 6371 *
                             Math.Acos(
-                                Math.Cos(ToRadians(-22.9060000000000)) * Math.Cos(ToRadians(latitude)) *
-                                Math.Cos(ToRadians(-43.0530000000000) - ToRadians(longitude)) +
-                                Math.Sin(ToRadians(-22.9060000000000)) *
+                                Math.Cos(ToRadians(-22.913924)) * Math.Cos(ToRadians(latitude)) *
+                                Math.Cos(ToRadians(-43.084737) - ToRadians(longitude)) +
+                                Math.Sin(ToRadians(-22.913924)) *
                                 Math.Sin(ToRadians(latitude))
                             );
             return response;

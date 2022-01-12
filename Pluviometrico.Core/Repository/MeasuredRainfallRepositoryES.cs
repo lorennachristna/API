@@ -11,7 +11,7 @@ namespace Pluviometrico.Core.Repository
     public class MeasuredRainfallRepositoryES : IMeasuredRainfallRepository
     {
         private readonly IElasticClient _elasticClient;
-        private readonly string _distanceCalculationString = "6371 * Math.acos(Math.cos(-22.9060000000000*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.0530000000000*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.9060000000000*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
+        private readonly string _distanceCalculationString = "6371 * Math.acos(Math.cos(-22.913924*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.084737*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.913924*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
 
         public MeasuredRainfallRepositoryES(IElasticClient elasticClient)
         {
@@ -231,7 +231,7 @@ namespace Pluviometrico.Core.Repository
 
         public async Task<List<object>> FilterByDistanceAndYear(int year, double distance)
         {
-            var distanceCalculationString = "6371 * Math.acos(Math.cos(-22.9060000000000*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.0530000000000*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.9060000000000*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
+            var distanceCalculationString = "6371 * Math.acos(Math.cos(-22.913924*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.084737*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.913924*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
 
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Source(true)
