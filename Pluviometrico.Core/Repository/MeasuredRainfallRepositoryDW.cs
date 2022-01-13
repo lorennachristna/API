@@ -153,7 +153,6 @@ namespace Pluviometrico.Core.Repository
                 .Include(f => f.Location)
                 .Include(f => f.Source)
                 .Include(f => f.Station)
-                .Include(f => f.Time)
                 .Select(f =>
                     new MeasuredRainfallDTO
                     {
@@ -176,6 +175,45 @@ namespace Pluviometrico.Core.Repository
 
             return response.Select(s => (object)s).ToList();
         }
+
+        public Task<List<MeasuredRainfallDTO>> GetAverageRainfallIndexByCity(string city, int limit)
+        {
+            var response = _context.FactRainList
+                .Include(f => f.Location)
+                .Include(f => f.Time)
+                .Include(f => f.Station)
+                .Where(f => f.Location.City == city)
+                .GroupBy(f => new
+                {
+                    f.Source.Source,
+                    f.Location.City,
+                    f.Location.UF,
+                    f.Station.StationCode,
+                    f.Station.StationName,
+                    Distance = 6371 *
+                            Math.Acos(
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (f.Location.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                Math.Sin((Math.PI / 180) * (f.Location.Latitude))
+                            )
+                })
+                .Select(g => new MeasuredRainfallDTO
+                {
+                    Source = g.Key.Source,
+                    City = g.Key.City,
+                    UF = g.Key.UF,
+                    StationCode = g.Key.StationCode,
+                    StationName = g.Key.StationName,
+                    Distance = g.Key.Distance,
+                    AverageRainfallIndex = g.Average(f => f.RainfallIndex)
+                });
+
+            return response.Distinct().Take(limit).ToListAsync();
+        }
+
+
+
 
 
 

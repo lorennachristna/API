@@ -1,4 +1,5 @@
 ﻿using Nest;
+using Pluviometrico.Core.DTOs;
 using Pluviometrico.Core.Repository.Interface;
 using Pluviometrico.Data;
 using System;
@@ -213,6 +214,77 @@ namespace Pluviometrico.Core.Repository
 
         }
 
+        public async Task<List<MeasuredRainfallDTO>> GetAverageRainfallIndexByCity(string city, int limit)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .RuntimeFields<MeasuredRainfallRuntimeFields>(r => r
+                    .RuntimeField(r => r.Distancia, FieldType.Double, r => r
+                        .Script($"double distancia = {_distanceCalculationString}; emit(distancia);")))
+                .Aggregations(a => a
+                    .Terms("codigoEstacao", t => t
+                        .Field(f => f.CodEstacaoOriginal.Suffix("keyword"))
+                        .Aggregations(a => a
+                            .Terms("estacao", t => t
+                                .Field(f => f.NomeEstacaoOriginal.Suffix("keyword"))
+                                .Aggregations(a => a
+                                    .Terms("municipio", t => t
+                                        .Field(f => f.Municipio.Suffix("keyword"))
+                                        .Aggregations(a => a
+                                            .Terms("UF", t => t
+                                                .Field(f => f.UF.Suffix("keyword"))
+                                                .Aggregations(a => a
+                                                    .Terms("distancia", t => t
+                                                        .Field("distancia")
+                                                        .Aggregations(a => a
+                                                            .Average("media", s => s
+                                                                .Field(f => f.ValorMedida)))))))))))))
+                .Query(q => q.Bool(b => b.Must(m =>
+                    m.Match(t => t
+                        .Field(f => f.Municipio).Query(city))
+                )))
+            );
+
+            var filteredResponse = new List<MeasuredRainfallDTO>();
+
+            var stationCodeBuckets = response.Aggregations.Terms("codigoEstacao").Buckets;
+            foreach (var stationCodeBucket in stationCodeBuckets)
+            {
+                var stationCode = stationCodeBucket.Key;
+                var stationBuckets = stationCodeBucket.Terms("estacao").Buckets;
+                foreach (var stationBucket in stationBuckets)
+                {
+                    var station = stationBucket.Key;
+                    var cityBuckets = stationBucket.Terms("municipio").Buckets;
+                    foreach (var cityBucket in cityBuckets)
+                    {
+                        var responseCity = cityBucket.Key;
+                        var UFBuckets = cityBucket.Terms("UF").Buckets;
+                        foreach (var UFBucket in UFBuckets)
+                        {
+                            var uF = UFBucket.Key;
+                            var distanceBuckets = UFBucket.Terms("distancia").Buckets;
+                            foreach (var distanceBucket in distanceBuckets)
+                            {
+                                var responseDistance = double.Parse(distanceBucket.Key);
+                                var average = distanceBucket.Average("media").Value;
+                                filteredResponse.Add(new MeasuredRainfallDTO
+                                {
+                                    Source = "CEMADEN",
+                                    City = responseCity,
+                                    UF = uF,
+                                    StationCode = stationCode,
+                                    StationName = station,
+                                    Distance = responseDistance,
+                                    AverageRainfallIndex = average
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            return filteredResponse.Take(limit).Distinct().ToList();
+        }
 
 
 

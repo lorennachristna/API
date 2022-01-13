@@ -1,4 +1,5 @@
-﻿using Pluviometrico.Data;
+﻿using Pluviometrico.Core.DTOs;
+using Pluviometrico.Data;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -42,6 +43,10 @@ namespace Pluviometrico.Core.Repository.Interface
         //Filtra por distância e cidade, limitando a um número de registros
         Task<List<object>> FilterByDistanceAndCity(double distance, string city, int limit);
 
+        //Consulta 11
+        //Devolve todos os campos, distância calculada e média de índice pluviométrico
+        //Filtra por cidade, limitando o número de registros
+        Task<List<MeasuredRainfallDTO>> GetAverageRainfallIndexByCity(string city, int limit);
 
 
 

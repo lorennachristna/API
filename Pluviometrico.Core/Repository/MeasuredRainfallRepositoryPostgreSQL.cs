@@ -152,6 +152,43 @@ namespace Pluviometrico.Core.Repository
             return  response.Select(r => (object)r).ToList();
         }
 
+        public Task<List<MeasuredRainfallDTO>> GetAverageRainfallIndexByCity(string city, int limit)
+        {
+            var response = _context.MeasuredRainfallList
+                .GroupBy(m =>
+                    new
+                    {
+                        m.Municipio,
+                        m.UF,
+                        m.CodEstacaoOriginal,
+                        m.NomeEstacaoOriginal,
+                        Distancia = 6371 *
+                            Math.Acos(
+                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                Math.Sin((Math.PI / 180) * (m.Latitude))
+                            )
+                    }
+                )
+                .Where(g => g.Key.Municipio == city)
+                .Select(g =>
+                new MeasuredRainfallDTO
+                {
+                    Source = "CEMADEN",
+                    City = g.Key.Municipio,
+                    UF = g.Key.UF,
+                    StationCode = g.Key.CodEstacaoOriginal,
+                    StationName = g.Key.NomeEstacaoOriginal,
+                    Distance = g.Key.Distancia,
+                    AverageRainfallIndex = g.Average(m => m.ValorMedida)
+                }
+            );
+
+            return response.Take(limit).Distinct().ToListAsync();
+        }
+
+
 
 
 

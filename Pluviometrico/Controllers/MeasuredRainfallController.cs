@@ -70,6 +70,18 @@ namespace Pluviometrico.Controllers
             return Ok(response);
         }
 
+        [HttpGet("media/cidade")]
+        public async Task<IActionResult> GetAverageRainfallIndexByCity([FromQuery] string city, [FromQuery] int limit)
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.GetAverageRainfallIndexByCity(city, limit);
+            return Ok(response);
+        }
+
+
+
+
+
+
 
 
         [HttpGet("{greaterThanYear:int}/{lessThanYear:int}/{distance:double}")]

@@ -15,6 +15,7 @@ namespace Pluviometrico.Core.DTOs
         public string StationName { get; set; }
         public double? Distance { get; set; }
         public double? RainfallIndex { get; set; }
+        public double? AverageRainfallIndex { get; set; }
 
 
         public bool Equals(MeasuredRainfallDTO other)
@@ -36,7 +37,8 @@ namespace Pluviometrico.Core.DTOs
                 StationCode.Equals(other.StationCode) &&
                 StationName.Equals(other.StationName) &&
                 Distance.Equals(other.Distance) &&
-                RainfallIndex.Equals(other.RainfallIndex);
+                RainfallIndex.Equals(other.RainfallIndex) &&
+                AverageRainfallIndex.Equals(other.AverageRainfallIndex);
         }
 
         public override int GetHashCode()
@@ -51,8 +53,9 @@ namespace Pluviometrico.Core.DTOs
             int hashStationName = StationName == null ? 0 : StationName.GetHashCode();
             int hashDistance = Distance == null ? 0 : Distance.GetHashCode();
             int hashRainfallIndex = RainfallIndex == null ? 0 : RainfallIndex.GetHashCode();
+            int hashAverageRainfallIndex = AverageRainfallIndex == null ? 0 : AverageRainfallIndex.GetHashCode();
 
-            return hashSource ^ hashCity ^ hashDay ^ hashMonth ^ hashYear ^ hashHour ^ hashStationCode ^ hashStationName ^ hashDistance ^ hashRainfallIndex;
+            return hashSource ^ hashCity ^ hashDay ^ hashMonth ^ hashYear ^ hashHour ^ hashStationCode ^ hashStationName ^ hashDistance ^ hashRainfallIndex ^ hashAverageRainfallIndex;
         }
 
 
