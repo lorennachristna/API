@@ -20,32 +20,54 @@ namespace Pluviometrico.Core.Repository
             _context = context;
         }
 
-        public async Task<List<object>> FilterByYear(int year)
+        public async Task<List<MeasuredRainfallDTO>> FilterByYear(int year)
         {
-            var response = _context.FactRainList
+            var response = await _context.FactRainList
                 .Include(f => f.Time)
                 .Include(f => f.Location)
                 .Include(f => f.Source)
                 .Include(f => f.Station)
-                .Where(f => f.Time.Year == year);
+                .Where(f => f.Time.Year == year)
+                .Select(f => 
+                    new MeasuredRainfallDTO 
+                    {
+                        Source = f.Source.Source,
+                        City = f.Location.City,
+                        UF = f.Location.UF,
+                        Day = f.Time.Day,
+                        Month = f.Time.Month,
+                        Year = f.Time.Year,
+                        StationCode = f.Station.StationCode,
+                        StationName = f.Station.StationName,
+                        RainfallIndex = f.RainfallIndex
+                    }).ToListAsync();
 
-            var facts = await response.Take(10).Select(fact => (object) fact).ToListAsync();
-
-            return facts;
+            return response.Take(10).ToList();
         }
 
-        public async Task<List<object>> FilterByRainfallIndex(double index)
+        public async Task<List<MeasuredRainfallDTO>> FilterByRainfallIndex(double index)
         {
-            var response = _context.FactRainList
+            var response = await _context.FactRainList
                 .Include(f => f.Time)
                 .Include(f => f.Location)
                 .Include(f => f.Source)
                 .Include(f => f.Station)
-                .Where(f => f.RainfallIndex > index);
+                .Where(f => f.RainfallIndex > index)
+                .Select(f =>
+                    new MeasuredRainfallDTO
+                    {
+                        Source = f.Source.Source,
+                        City = f.Location.City,
+                        UF = f.Location.UF,
+                        Day = f.Time.Day,
+                        Month = f.Time.Month,
+                        Year = f.Time.Year,
+                        StationCode = f.Station.StationCode,
+                        StationName = f.Station.StationName,
+                        RainfallIndex = f.RainfallIndex
+                    }).ToListAsync();
 
-            var facts = await response.Take(10).Select(fact => (object)fact).ToListAsync();
-
-            return facts;
+            return response.Take(10).ToList();
         }
 
         public Task<List<object>> FilterByDistance(double distance)

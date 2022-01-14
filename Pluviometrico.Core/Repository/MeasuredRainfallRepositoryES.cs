@@ -18,7 +18,7 @@ namespace Pluviometrico.Core.Repository
         {
             _elasticClient = elasticClient;
         }
-        public async Task<List<object>> FilterByYear(int year)
+        public async Task<List<MeasuredRainfallDTO>> FilterByYear(int year)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s =>
                 s.Query(q =>
@@ -30,10 +30,22 @@ namespace Pluviometrico.Core.Repository
                 )
             );
 
-            return response?.Documents?.Select(d => (object) d).ToList();
+            return response?.Documents?.Select(d => new MeasuredRainfallDTO
+            {
+                Source = "CEMADEN",
+                City = d.Municipio,
+                UF = d.UF,
+                Day = d.Dia,
+                Month = d.Mes,
+                Year = d.Ano,
+                Hour = d.Hora,
+                StationCode = d.CodEstacaoOriginal,
+                StationName = d.NomeEstacaoOriginal,
+                RainfallIndex = d.ValorMedida
+            }).ToList();
         }
 
-        public async Task<List<object>> FilterByRainfallIndex(double index)
+        public async Task<List<MeasuredRainfallDTO>> FilterByRainfallIndex(double index)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s =>
                 s.Query(q =>
@@ -45,7 +57,19 @@ namespace Pluviometrico.Core.Repository
                 )
             );
 
-            return response?.Documents?.Select(d => (object)d).ToList();
+            return response?.Documents?.Select(d => new MeasuredRainfallDTO
+            {
+                Source = "CEMADEN",
+                City = d.Municipio,
+                UF = d.UF,
+                Day = d.Dia,
+                Month = d.Mes,
+                Year = d.Ano,
+                Hour = d.Hora,
+                StationCode = d.CodEstacaoOriginal,
+                StationName = d.NomeEstacaoOriginal,
+                RainfallIndex = d.ValorMedida
+            }).ToList();
         }
 
         public async Task<List<object>> FilterByDistance(double distance)

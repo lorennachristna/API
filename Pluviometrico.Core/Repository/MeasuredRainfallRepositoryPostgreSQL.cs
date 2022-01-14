@@ -22,14 +22,38 @@ namespace Pluviometrico.Core.Repository
         //TODO: Remove .Take
         //TODO: Add Classes for each response type? Like with fields Distance and Source.
         //TODO: Make distance calculation function work
-        public Task<List<object>> FilterByYear(int year)
+        public Task<List<MeasuredRainfallDTO>> FilterByYear(int year)
         {
-             return _context.MeasuredRainfallList.Where(m => m.Ano == year).Select(m => (object) m).Take(10).ToListAsync();
+             return _context.MeasuredRainfallList.Where(m => m.Ano == year).Select(m => 
+             new MeasuredRainfallDTO 
+             { 
+                 Source = "CEMADEN",
+                 City = m.Municipio,
+                 UF = m.UF,
+                 Day = m.Dia,
+                 Month = m.Mes,
+                 Year = m.Ano,
+                 StationCode = m.CodEstacaoOriginal,
+                 StationName = m.NomeEstacaoOriginal,
+                 RainfallIndex = m.ValorMedida
+             }).Take(10).ToListAsync();
         }
 
-        public Task<List<object>> FilterByRainfallIndex(double index)
+        public Task<List<MeasuredRainfallDTO>> FilterByRainfallIndex(double index)
         {
-            return _context.MeasuredRainfallList.Where(m => m.ValorMedida > index).Select(m => (object)m).Take(10).ToListAsync();
+            return _context.MeasuredRainfallList.Where(m => m.ValorMedida > index).Select(m =>
+             new MeasuredRainfallDTO
+             {
+                 Source = "CEMADEN",
+                 City = m.Municipio,
+                 UF = m.UF,
+                 Day = m.Dia,
+                 Month = m.Mes,
+                 Year = m.Ano,
+                 StationCode = m.CodEstacaoOriginal,
+                 StationName = m.NomeEstacaoOriginal,
+                 RainfallIndex = m.ValorMedida
+             }).Take(10).ToListAsync();
         }
 
         public Task<List<object>> FilterByDistance(double distance)

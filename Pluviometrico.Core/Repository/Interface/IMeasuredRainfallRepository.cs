@@ -11,12 +11,12 @@ namespace Pluviometrico.Core.Repository.Interface
         //Consulta 1
         //Devolve todos os campos
         //Filtra por ano e mês
-        Task<List<object>> FilterByYear(int year);
+        Task<List<MeasuredRainfallDTO>> FilterByYear(int year);
 
         //Consultas 2 e 3
         //Devolve todos os campos
         //Filtra por índice pluviométrico
-        Task<List<object>> FilterByRainfallIndex(double index);
+        Task<List<MeasuredRainfallDTO>> FilterByRainfallIndex(double index);
 
         //Consulta 4
         //Devolve todos os campos e a distância calculada
