@@ -33,6 +33,7 @@ namespace Pluviometrico.Core.Repository
                  Day = m.Dia,
                  Month = m.Mes,
                  Year = m.Ano,
+                 Hour = m.Hora,
                  StationCode = m.CodEstacaoOriginal,
                  StationName = m.NomeEstacaoOriginal,
                  RainfallIndex = m.ValorMedida
@@ -50,19 +51,29 @@ namespace Pluviometrico.Core.Repository
                  Day = m.Dia,
                  Month = m.Mes,
                  Year = m.Ano,
+                 Hour = m.Hora,
                  StationCode = m.CodEstacaoOriginal,
                  StationName = m.NomeEstacaoOriginal,
                  RainfallIndex = m.ValorMedida
              }).Take(10).ToListAsync();
         }
 
-        public Task<List<object>> FilterByDistance(double distance)
+        public Task<List<MeasuredRainfallDTO>> FilterByDistance(double distance)
         {
             var response = _context.MeasuredRainfallList
-                .Select(m =>
-                    new {
-                        Source = m,
-                        Distancia = 6371 *
+                .Select(m => new MeasuredRainfallDTO
+                    {
+                        Source = "CEMADEN",
+                        City = m.Municipio,
+                        UF = m.UF,
+                        Day = m.Dia,
+                        Month = m.Mes,
+                        Year = m.Ano,
+                        Hour = m.Hora,
+                        StationCode = m.CodEstacaoOriginal,
+                        StationName = m.NomeEstacaoOriginal,
+                        RainfallIndex = m.ValorMedida,
+                        Distance = 6371 *
                             Math.Acos(
                                 Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
                                 Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
@@ -71,86 +82,114 @@ namespace Pluviometrico.Core.Repository
                             )
                     }
                 )
-                .Where(s => s.Distancia < distance)
-                .Select(w => (object)w);
+                .Where(s => s.Distance < distance)
+                .Take(10).ToListAsync();
 
-            return response.Take(10).ToListAsync();
+            return response;
         }
 
-        public Task<List<object>> FilterByDistanceAndRainfallIndex(double distance, double index)
+        public async Task<List<MeasuredRainfallDTO>> FilterByDistanceAndRainfallIndex(double distance, double index)
         {
-            var response = _context.MeasuredRainfallList
+            var response = await _context.MeasuredRainfallList
                 .Where(m => m.ValorMedida > index)
-                .Select(m =>
-                    new {
-                        Source = m,
-                        Distancia = 6371 *
-                            Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.913924)) *
-                                Math.Sin((Math.PI / 180) * (m.Latitude))
-                            )
+                .Select(m => new MeasuredRainfallDTO
+                    {
+                        Source = "CEMADEN",
+                        City = m.Municipio,
+                        UF = m.UF,
+                        Day = m.Dia,
+                        Month = m.Mes,
+                        Year = m.Ano,
+                        Hour = m.Hora,
+                        StationCode = m.CodEstacaoOriginal,
+                        StationName = m.NomeEstacaoOriginal,
+                        RainfallIndex = m.ValorMedida,
+                        Distance = 6371 *
+                                Math.Acos(
+                                    Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                    Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                    Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                    Math.Sin((Math.PI / 180) * (m.Latitude))
+                                )
                     }
                 )
-                .Where(s => s.Distancia < distance)
-                .Select(w => (object)w);
+                .Where(s => s.Distance < distance).ToListAsync();
 
-            return response.Take(10).ToListAsync();
+            return response.Take(10).ToList();
         }
 
-        public Task<List<object>> FilterByDistanceAndDate(double distance, int year, int month, int day)
+        public async Task<List<MeasuredRainfallDTO>> FilterByDistanceAndDate(double distance, int year, int month, int day)
         {
-            var response = _context.MeasuredRainfallList
+            var response = await _context.MeasuredRainfallList
                 .Where(m => 
                     m.Ano == year &&
                     m.Mes == month &&
                     m.Dia == day)
-                .Select(m =>
-                    new {
-                        Source = m,
-                        Distancia = 6371 *
-                            Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.913924)) *
-                                Math.Sin((Math.PI / 180) * (m.Latitude))
-                            )
+                .Select(m => 
+                    new MeasuredRainfallDTO
+                    {
+                        Source = "CEMADEN",
+                        City = m.Municipio,
+                        UF = m.UF,
+                        Day = m.Dia,
+                        Month = m.Mes,
+                        Year = m.Ano,
+                        Hour = m.Hora,
+                        StationCode = m.CodEstacaoOriginal,
+                        StationName = m.NomeEstacaoOriginal,
+                        RainfallIndex = m.ValorMedida,
+                        Distance = 6371 *
+                                Math.Acos(
+                                    Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                    Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                    Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                    Math.Sin((Math.PI / 180) * (m.Latitude))
+                                )
                     }
                 )
-                .Where(s => s.Distancia < distance)
-                .Select(w => (object)w);
+                .Where(s => s.Distance < distance)
+                .ToListAsync();
 
-            return response.Take(10).ToListAsync();
+            return response.Take(10).ToList();
         }
 
-        public Task<List<object>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance)
+        public async Task<List<MeasuredRainfallDTO>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance)
         {
             var dates = Utils.MaxMinDate(firstDate, secondDate);
 
-            var response = _context.MeasuredRainfallList
+            var response = await _context.MeasuredRainfallList
                 .Select(m =>
-                    new
+                    new MeasuredRainfallDTO
                     {
-                        Source = m,
-                        Distancia = 6371 *
-                            Math.Acos(
-                                Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
-                                Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
-                                Math.Sin((Math.PI / 180) * (-22.913924)) *
-                                Math.Sin((Math.PI / 180) * (m.Latitude))),
-                        Data = new DateTime(m.Ano, m.Mes, m.Dia)
+                        Source = "CEMADEN",
+                        City = m.Municipio,
+                        UF = m.UF,
+                        Day = m.Dia,
+                        Month = m.Mes,
+                        Year = m.Ano,
+                        Hour = m.Hora,
+                        StationCode = m.CodEstacaoOriginal,
+                        StationName = m.NomeEstacaoOriginal,
+                        RainfallIndex = m.ValorMedida,
+                        Distance = 6371 *
+                                Math.Acos(
+                                    Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                    Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                    Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                    Math.Sin((Math.PI / 180) * (m.Latitude))
+                                ),
+                        Date = new DateTime(m.Ano, m.Mes, m.Dia)
                     })
                 .Where(s =>
-                    s.Distancia < distance &&
-                    s.Data <= dates.greaterDate &&
-                    s.Data >= dates.lesserDate
-                );
+                    s.Distance < distance &&
+                    s.Date <= dates.greaterDate &&
+                    s.Date >= dates.lesserDate
+                ).ToListAsync();
 
-            return response.Select(r => (object)r).Take(10).ToListAsync();
+            return response.Take(10).ToList();
         }
 
-        public async Task<List<object>> FilterByDistanceAndCity(double distance, string city, int limit)
+        public async Task<List<MeasuredRainfallDTO>> FilterByDistanceAndCity(double distance, string city, int limit)
         {
             var response = await _context.MeasuredRainfallList
                 .Select(m =>
@@ -161,6 +200,7 @@ namespace Pluviometrico.Core.Repository
                         UF = m.UF,
                         StationCode = m.CodEstacaoOriginal,
                         StationName = m.NomeEstacaoOriginal,
+                        RainfallIndex = m.ValorMedida,
                         Distance = 6371 *
                             Math.Acos(
                                 Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
@@ -171,9 +211,9 @@ namespace Pluviometrico.Core.Repository
                 .Where(s =>
                     s.Distance > distance &&
                     s.City == city
-                ).Distinct().Take(limit).ToListAsync();
+                ).Distinct().ToListAsync();
 
-            return  response.Select(r => (object)r).ToList();
+            return response.Take(limit).ToList();
         }
 
         public Task<List<MeasuredRainfallDTO>> GetAverageRainfallIndexByCity(string city, int limit)

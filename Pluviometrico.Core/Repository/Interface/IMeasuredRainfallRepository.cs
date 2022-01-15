@@ -21,27 +21,27 @@ namespace Pluviometrico.Core.Repository.Interface
         //Consulta 4
         //Devolve todos os campos e a distância calculada
         //Filtra por distância
-        Task<List<object>> FilterByDistance(double distance);
+        Task<List<MeasuredRainfallDTO>> FilterByDistance(double distance);
 
         //Consulta 5
         //Devolve todos os campos e a distância calculada
         //Filtra por distância
-        Task<List<object>> FilterByDistanceAndRainfallIndex(double distance, double index);
+        Task<List<MeasuredRainfallDTO>> FilterByDistanceAndRainfallIndex(double distance, double index);
 
         //Consulta 6
         //Devolve todos os campos e a distância calculada
         //Filtra por distância, ano, mês, dia
-        Task<List<object>> FilterByDistanceAndDate(double distance, int year, int month, int day);
+        Task<List<MeasuredRainfallDTO>> FilterByDistanceAndDate(double distance, int year, int month, int day);
 
         //Consulta 7
         //Devolve todos os campos e a distância calculada
         //Filtra por distância e intervalo de datas
-        Task<List<object>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance);
+        Task<List<MeasuredRainfallDTO>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance);
 
         //Consulta 8, 9 e 10
         //Devolve todos os campos e a distância calculada
         //Filtra por distância e cidade, limitando a um número de registros
-        Task<List<object>> FilterByDistanceAndCity(double distance, string city, int limit);
+        Task<List<MeasuredRainfallDTO>> FilterByDistanceAndCity(double distance, string city, int limit);
 
         //Consulta 11
         //Devolve todos os campos, distância calculada e média de índice pluviométrico

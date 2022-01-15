@@ -72,7 +72,7 @@ namespace Pluviometrico.Core.Repository
             }).ToList();
         }
 
-        public async Task<List<object>> FilterByDistance(double distance)
+        public async Task<List<MeasuredRainfallDTO>> FilterByDistance(double distance)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Source(true)
@@ -86,21 +86,30 @@ namespace Pluviometrico.Core.Repository
                                 .Script(s => s
                                     .Source($"double distancia = {_distanceCalculationString}; return distancia < {distance};"))))))
             );
-            var filteredResponse = new List<object>();
+            var filteredResponse = new List<MeasuredRainfallDTO> ();
 
             foreach (var hit in response?.Hits)
             {
-                filteredResponse.Add(new
+                filteredResponse.Add(new MeasuredRainfallDTO
                 {
-                    source = hit.Source,
-                    distancia = hit.Fields.Value<double>("distancia")
+                    Source = "CEMADEN",
+                    City = hit.Source.Municipio,
+                    UF = hit.Source.UF,
+                    Day = hit.Source.Dia,
+                    Month = hit.Source.Mes,
+                    Year = hit.Source.Ano,
+                    Hour = hit.Source.Hora,
+                    StationCode = hit.Source.CodEstacaoOriginal,
+                    StationName = hit.Source.NomeEstacaoOriginal,
+                    RainfallIndex = hit.Source.ValorMedida,
+                    Distance = hit.Fields.Value<double>("distancia")
                 });
             }
 
             return filteredResponse;
         }
 
-        public async Task<List<object>> FilterByDistanceAndRainfallIndex(double distance, double index)
+        public async Task<List<MeasuredRainfallDTO>> FilterByDistanceAndRainfallIndex(double distance, double index)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Source(true)
@@ -112,25 +121,34 @@ namespace Pluviometrico.Core.Repository
                         .Filter(f => f
                             .Script(s => s
                                 .Script(s => s
-                                    .Source($"double distancia = {_distanceCalculationString}; return distancia > {distance};"))))
-                        .Must(m => m.Range(r => r.Field(f => f.ValorMedida).LessThan(index)))
+                                    .Source($"double distancia = {_distanceCalculationString}; return distancia < {distance};"))))
+                        .Must(m => m.Range(r => r.Field(f => f.ValorMedida).GreaterThan(index)))
                         ))
             );
-            var filteredResponse = new List<object>();
+            var filteredResponse = new List<MeasuredRainfallDTO>();
 
             foreach (var hit in response?.Hits)
             {
-                filteredResponse.Add(new
+                filteredResponse.Add(new MeasuredRainfallDTO
                 {
-                    source = hit.Source,
-                    distancia = hit.Fields.Value<double>("distancia")
+                    Source = "CEMADEN",
+                    City = hit.Source.Municipio,
+                    UF = hit.Source.UF,
+                    Day = hit.Source.Dia,
+                    Month = hit.Source.Mes,
+                    Year = hit.Source.Ano,
+                    Hour = hit.Source.Hora,
+                    StationCode = hit.Source.CodEstacaoOriginal,
+                    StationName = hit.Source.NomeEstacaoOriginal,
+                    RainfallIndex = hit.Source.ValorMedida,
+                    Distance = hit.Fields.Value<double>("distancia")
                 });
             }
 
             return filteredResponse;
         }
 
-        public async Task<List<object>> FilterByDistanceAndDate(double distance, int year, int month, int day)
+        public async Task<List<MeasuredRainfallDTO>> FilterByDistanceAndDate(double distance, int year, int month, int day)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Source(true)
@@ -149,47 +167,30 @@ namespace Pluviometrico.Core.Repository
                             m.Term(t => t.Field(f => f.Dia).Value(day))
                         )))
             );
-            var filteredResponse = new List<object>();
+            var filteredResponse = new List<MeasuredRainfallDTO>();
 
             foreach (var hit in response?.Hits)
             {
-                filteredResponse.Add(new
+                filteredResponse.Add(new MeasuredRainfallDTO
                 {
-                    source = hit.Source,
-                    distancia = hit.Fields.Value<double>("distancia")
+                    Source = "CEMADEN",
+                    City = hit.Source.Municipio,
+                    UF = hit.Source.UF,
+                    Day = hit.Source.Dia,
+                    Month = hit.Source.Mes,
+                    Year = hit.Source.Ano,
+                    Hour = hit.Source.Hora,
+                    StationCode = hit.Source.CodEstacaoOriginal,
+                    StationName = hit.Source.NomeEstacaoOriginal,
+                    RainfallIndex = hit.Source.ValorMedida,
+                    Distance = hit.Fields.Value<double>("distancia")
                 });
             }
 
             return filteredResponse;
         }
 
-        //TODO: Check if adding "distancia" field significantly slows response time"?
-        public async Task<List<object>> FilterByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
-        {
-            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
-                .Source(true)
-                .ScriptFields(sf =>
-                    sf.ScriptField("distancia", script => script
-                        .Source(_distanceCalculationString)))
-                .Query(q =>
-                    q.Bool(b => b
-                        .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {_distanceCalculationString} ; return distancia < {distance};"))))
-                        .Must(m => m.Range(r => r.Field(f => f.Ano).GreaterThanOrEquals(greaterThanYear).LessThanOrEquals(lessThanYear))))));
-
-            var filteredResponse = new List<object>();
-
-            foreach(var h in response?.Hits)
-            {
-                filteredResponse.Add(new
-                {
-                    Source = h.Source,
-                    Distancia = h.Fields.Value<double>("distancia")
-                });
-            }
-            return filteredResponse;
-        }
-
-        public async Task<List<object>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance)
+        public async Task<List<MeasuredRainfallDTO>> FilterByDistanceAndDateRange(DateTime firstDate, DateTime secondDate, double distance)
         {
             var dates = Utils.MaxMinDate(firstDate, secondDate);
 
@@ -203,20 +204,29 @@ namespace Pluviometrico.Core.Repository
                     .Must(m => m.DateRange(r => r.Field(f => f.DataHora).GreaterThanOrEquals(DateMath.Anchored(dates.lesserDate)).LessThanOrEquals(DateMath.Anchored(dates.greaterDate)))))
             ));
 
-            var filteredResponse = new List<object>();
+            var filteredResponse = new List<MeasuredRainfallDTO>();
 
-            foreach (var h in response?.Hits)
+            foreach (var hit in response?.Hits)
             {
-                filteredResponse.Add(new
+                filteredResponse.Add(new MeasuredRainfallDTO
                 {
-                    Source = h.Source,
-                    Distancia = h.Fields.Value<double>("distancia")
+                    Source = "CEMADEN",
+                    City = hit.Source.Municipio,
+                    UF = hit.Source.UF,
+                    Day = hit.Source.Dia,
+                    Month = hit.Source.Mes,
+                    Year = hit.Source.Ano,
+                    Hour = hit.Source.Hora,
+                    StationCode = hit.Source.CodEstacaoOriginal,
+                    StationName = hit.Source.NomeEstacaoOriginal,
+                    RainfallIndex = hit.Source.ValorMedida,
+                    Distance = hit.Fields.Value<double>("distancia")
                 });
             }
             return filteredResponse;
         }
 
-        public async Task<List<object>> FilterByDistanceAndCity(double distance, string city, int limit)
+        public async Task<List<MeasuredRainfallDTO>> FilterByDistanceAndCity(double distance, string city, int limit)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
                 .Source(true)
@@ -228,14 +238,21 @@ namespace Pluviometrico.Core.Repository
                         .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {_distanceCalculationString} ; return distancia > {distance};"))))
                         .Must(m => m.Match(t => t.Field(f => f.Municipio).Query(city))))));
 
-            var filteredResponse = new HashSet<object>();
+            var filteredResponse = new HashSet<MeasuredRainfallDTO>();
 
-            foreach (var h in response?.Hits)
+            foreach (var hit in response?.Hits)
             {
-                filteredResponse.Add(Utils.FormattedResponse(h.Source, h.Fields.Value<double>("distancia")));
+                filteredResponse.Add(new MeasuredRainfallDTO {
+                    Source = "CEMADEN",
+                    City = hit.Source.Municipio,
+                    UF = hit.Source.UF,
+                    StationCode = hit.Source.CodEstacaoOriginal,
+                    StationName = hit.Source.NomeEstacaoOriginal,
+                    RainfallIndex = hit.Source.ValorMedida,
+                    Distance = hit.Fields.Value<double>("distancia")
+                });
             }
             return filteredResponse.Take(limit).ToList();
-
         }
 
         public async Task<List<MeasuredRainfallDTO>> GetAverageRainfallIndexByCity(string city, int limit)
@@ -324,7 +341,31 @@ namespace Pluviometrico.Core.Repository
 
 
 
+        //TODO: Check if adding "distancia" field significantly slows response time"?
+        public async Task<List<object>> FilterByDistanceAndYearRange(int greaterThanYear, int lessThanYear, double distance)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(sf =>
+                    sf.ScriptField("distancia", script => script
+                        .Source(_distanceCalculationString)))
+                .Query(q =>
+                    q.Bool(b => b
+                        .Filter(f => f.Script(s => s.Script(s => s.Source($"double distancia = {_distanceCalculationString} ; return distancia < {distance};"))))
+                        .Must(m => m.Range(r => r.Field(f => f.Ano).GreaterThanOrEquals(greaterThanYear).LessThanOrEquals(lessThanYear))))));
 
+            var filteredResponse = new List<object>();
+
+            foreach (var h in response?.Hits)
+            {
+                filteredResponse.Add(new
+                {
+                    Source = h.Source,
+                    Distancia = h.Fields.Value<double>("distancia")
+                });
+            }
+            return filteredResponse;
+        }
         public async Task<List<object>> FilterByDistanceAndYear(int year, double distance)
         {
             var distanceCalculationString = "6371 * Math.acos(Math.cos(-22.913924*Math.PI/180) * Math.cos(doc['latitude'].value*Math.PI/180) * Math.cos(-43.084737*Math.PI/180 - (doc['longitude'].value*Math.PI/180)) + Math.sin(-22.913924*Math.PI/180) * Math.sin(doc['latitude'].value*Math.PI/180))";
