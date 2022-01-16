@@ -77,8 +77,38 @@ namespace Pluviometrico.Controllers
             return Ok(response);
         }
 
+        [HttpGet("gelocalizacao/cidade")]
+        public async Task<IActionResult> FilterByGeolocationAndCity(
+            [FromQuery] string city,
+            [FromQuery] double minLatitude, [FromQuery] double maxLatitude,
+            [FromQuery] double minLongitude, [FromQuery] double maxLongitude
+        )
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByGeolocationAndCity(city, minLatitude, maxLatitude, minLongitude, maxLongitude);
+            return Ok(response);
+        }
 
+        [HttpGet("gelocalizacao/data-intervalo")]
+        public async Task<IActionResult> FilterByGeolocationAndDateRange(
+            [FromQuery] DateTime firstDate, [FromQuery] DateTime secondDate,
+            [FromQuery] double minLatitude, [FromQuery] double maxLatitude,
+            [FromQuery] double minLongitude, [FromQuery] double maxLongitude
+        )
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByGeolocationAndDateRange(firstDate, secondDate, minLatitude, maxLatitude, minLongitude, maxLongitude);
+            return Ok(response);
+        }
 
+        [HttpGet("gelocalizacao/indice")]
+        public async Task<IActionResult> FilterByGeolocationAndRainfallIndex(
+            [FromQuery] double index,
+            [FromQuery] double minLatitude, [FromQuery] double maxLatitude,
+            [FromQuery] double minLongitude, [FromQuery] double maxLongitude
+        )
+        {
+            var response = await _unitOfWork.MeasuredRainfallList.FilterByGeolocationAndRainfallIndex(index, minLatitude, maxLatitude, minLongitude, maxLongitude);
+            return Ok(response);
+        }
 
 
 

@@ -285,9 +285,134 @@ namespace Pluviometrico.Core.Repository
             return response.Distinct().Take(limit).ToListAsync();
         }
 
+        public async Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndCity(string city,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude)
+        {
+            var response = await _context.FactRainList
+                .Include(f => f.Time)
+                .Include(f => f.Location)
+                .Include(f => f.Source)
+                .Include(f => f.Station)
+                .Where(f => 
+                    f.Location.Latitude > minLatitude &&
+                    f.Location.Latitude < maxLatitude &&
+                    f.Location.Longitude > minLongitude &&
+                    f.Location.Longitude < maxLongitude
+                )
+                .Select(f =>
+                    new MeasuredRainfallDTO
+                    {
+                        Source = f.Source.Source,
+                        City = f.Location.City,
+                        UF = f.Location.UF,
+                        Day = f.Time.Day,
+                        Month = f.Time.Month,
+                        Year = f.Time.Year,
+                        Hour = f.Time.Hour,
+                        StationCode = f.Station.StationCode,
+                        StationName = f.Station.StationName,
+                        RainfallIndex = f.RainfallIndex,
+                        Distance = 6371 *
+                                Math.Acos(
+                                    Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
+                                    Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (f.Location.Longitude)) +
+                                    Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                    Math.Sin((Math.PI / 180) * (f.Location.Latitude))
+                                )
+                    })
+                .Where(s => s.City == city).ToListAsync();
 
+            return response.Take(10).ToList();
+        }
 
+        public async Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndDateRange(DateTime firstDate, DateTime secondDate,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude)
+        {
+            var dates = Utils.MaxMinDate(firstDate, secondDate);
 
+            var response = await _context.FactRainList
+                .Include(f => f.Time)
+                .Include(f => f.Location)
+                .Include(f => f.Source)
+                .Include(f => f.Station)
+                .Where(f =>
+                    f.Location.Latitude > minLatitude &&
+                    f.Location.Latitude < maxLatitude &&
+                    f.Location.Longitude > minLongitude &&
+                    f.Location.Longitude < maxLongitude
+                )
+                .Select(f =>
+                    new MeasuredRainfallDTO
+                    {
+                        Source = f.Source.Source,
+                        City = f.Location.City,
+                        UF = f.Location.UF,
+                        Day = f.Time.Day,
+                        Month = f.Time.Month,
+                        Year = f.Time.Year,
+                        Hour = f.Time.Hour,
+                        StationCode = f.Station.StationCode,
+                        StationName = f.Station.StationName,
+                        RainfallIndex = f.RainfallIndex,
+                        Distance = 6371 *
+                                Math.Acos(
+                                    Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
+                                    Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (f.Location.Longitude)) +
+                                    Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                    Math.Sin((Math.PI / 180) * (f.Location.Latitude))
+                                ),
+                        Date = new DateTime(f.Time.Year, f.Time.Month, f.Time.Day)
+                    })
+                .Where(s => 
+                    s.Date <= dates.greaterDate &&
+                    s.Date >= dates.lesserDate
+                ).ToListAsync();
+
+            return response.Take(10).ToList();
+        }
+
+        public async Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndRainfallIndex(double index,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude)
+        {
+            var response = await _context.FactRainList
+                .Include(f => f.Time)
+                .Include(f => f.Location)
+                .Include(f => f.Source)
+                .Include(f => f.Station)
+                .Where(f =>
+                    f.Location.Latitude > minLatitude &&
+                    f.Location.Latitude < maxLatitude &&
+                    f.Location.Longitude > minLongitude &&
+                    f.Location.Longitude < maxLongitude
+                )
+                .Select(f =>
+                    new MeasuredRainfallDTO
+                    {
+                        Source = f.Source.Source,
+                        City = f.Location.City,
+                        UF = f.Location.UF,
+                        Day = f.Time.Day,
+                        Month = f.Time.Month,
+                        Year = f.Time.Year,
+                        Hour = f.Time.Hour,
+                        StationCode = f.Station.StationCode,
+                        StationName = f.Station.StationName,
+                        RainfallIndex = f.RainfallIndex,
+                        Distance = 6371 *
+                                Math.Acos(
+                                    Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (f.Location.Latitude)) *
+                                    Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (f.Location.Longitude)) +
+                                    Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                    Math.Sin((Math.PI / 180) * (f.Location.Latitude))
+                                )
+                    })
+                .Where(s => s.RainfallIndex >= index).ToListAsync();
+
+            return response.Take(10).ToList();
+        }
 
 
 

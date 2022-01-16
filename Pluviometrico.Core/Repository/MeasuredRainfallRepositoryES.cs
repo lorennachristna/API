@@ -327,8 +327,128 @@ namespace Pluviometrico.Core.Repository
             return filteredResponse.Take(limit).Distinct().ToList();
         }
 
+        public async Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndCity(string city,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(sf =>
+                    sf.ScriptField("distancia", script => script
+                        .Source(_distanceCalculationString)))
+                .Query(q =>
+                    q.Bool(b => 
+                        b.Must(m =>
+                            m.Match(m => m.Field(f => f.Municipio).Query(city)) &&
+                            m.Range(t => t.Field(f => f.Latitude).GreaterThan(minLatitude)) &&
+                            m.Range(t => t.Field(f => f.Latitude).LessThan(maxLatitude)) &&
+                            m.Range(t => t.Field(f => f.Longitude).GreaterThan(minLongitude)) &&
+                            m.Range(t => t.Field(f => f.Longitude).LessThan(maxLongitude))))));
 
+            var filteredResponse = new List<MeasuredRainfallDTO>();
 
+            foreach (var hit in response?.Hits)
+            {
+                filteredResponse.Add(new MeasuredRainfallDTO
+                {
+                    Source = "CEMADEN",
+                    City = hit.Source.Municipio,
+                    UF = hit.Source.UF,
+                    Year = hit.Source.Ano,
+                    Month = hit.Source.Mes,
+                    Day = hit.Source.Dia,
+                    Hour = hit.Source.Hora,
+                    StationCode = hit.Source.CodEstacaoOriginal,
+                    StationName = hit.Source.NomeEstacaoOriginal,
+                    RainfallIndex = hit.Source.ValorMedida,
+                    Distance = hit.Fields.Value<double>("distancia")
+                });
+            }
+            return filteredResponse;
+        }
+
+        public async Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndDateRange(DateTime firstDate, DateTime secondDate,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude)
+        {
+
+            var dates = Utils.MaxMinDate(firstDate, secondDate);
+
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(sf =>
+                    sf.ScriptField("distancia", script => script
+                        .Source(_distanceCalculationString)))
+                .Query(q =>
+                    q.Bool(b =>
+                        b.Must(m =>
+                            m.DateRange(r => r.Field(f => f.DataHora).GreaterThanOrEquals(dates.lesserDate).LessThanOrEquals(dates.greaterDate)) &&
+                            m.Range(t => t.Field(f => f.Latitude).GreaterThan(minLatitude)) &&
+                            m.Range(t => t.Field(f => f.Latitude).LessThan(maxLatitude)) &&
+                            m.Range(t => t.Field(f => f.Longitude).GreaterThan(minLongitude)) &&
+                            m.Range(t => t.Field(f => f.Longitude).LessThan(maxLongitude))))));
+
+            var filteredResponse = new List<MeasuredRainfallDTO>();
+
+            foreach (var hit in response?.Hits)
+            {
+                filteredResponse.Add(new MeasuredRainfallDTO
+                {
+                    Source = "CEMADEN",
+                    City = hit.Source.Municipio,
+                    UF = hit.Source.UF,
+                    Year = hit.Source.Ano,
+                    Month = hit.Source.Mes,
+                    Day = hit.Source.Dia,
+                    Hour = hit.Source.Hora,
+                    StationCode = hit.Source.CodEstacaoOriginal,
+                    StationName = hit.Source.NomeEstacaoOriginal,
+                    RainfallIndex = hit.Source.ValorMedida,
+                    Distance = hit.Fields.Value<double>("distancia")
+                });
+            }
+            return filteredResponse;
+        }
+
+        public async Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndRainfallIndex(double index,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude)
+        {
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Source(true)
+                .ScriptFields(sf =>
+                    sf.ScriptField("distancia", script => script
+                        .Source(_distanceCalculationString)))
+                .Query(q =>
+                    q.Bool(b =>
+                        b.Must(m =>
+                            m.Range(r => r.Field(f => f.ValorMedida).GreaterThanOrEquals(index)) &&
+                            m.Range(t => t.Field(f => f.Latitude).GreaterThan(minLatitude)) &&
+                            m.Range(t => t.Field(f => f.Latitude).LessThan(maxLatitude)) &&
+                            m.Range(t => t.Field(f => f.Longitude).GreaterThan(minLongitude)) &&
+                            m.Range(t => t.Field(f => f.Longitude).LessThan(maxLongitude))))));
+
+            var filteredResponse = new List<MeasuredRainfallDTO>();
+
+            foreach (var hit in response?.Hits)
+            {
+                filteredResponse.Add(new MeasuredRainfallDTO
+                {
+                    Source = "CEMADEN",
+                    City = hit.Source.Municipio,
+                    UF = hit.Source.UF,
+                    Year = hit.Source.Ano,
+                    Month = hit.Source.Mes,
+                    Day = hit.Source.Dia,
+                    Hour = hit.Source.Hora,
+                    StationCode = hit.Source.CodEstacaoOriginal,
+                    StationName = hit.Source.NomeEstacaoOriginal,
+                    RainfallIndex = hit.Source.ValorMedida,
+                    Distance = hit.Fields.Value<double>("distancia")
+                });
+            }
+            return filteredResponse;
+        }
 
 
 

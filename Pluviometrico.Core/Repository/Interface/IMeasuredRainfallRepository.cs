@@ -48,6 +48,21 @@ namespace Pluviometrico.Core.Repository.Interface
         //Filtra por cidade, limitando o número de registros
         Task<List<MeasuredRainfallDTO>> GetAverageRainfallIndexByCity(string city, int limit);
 
+        //Consulta 13
+        Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndCity(string city, 
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude);
+        
+        //Consulta 14
+        Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndDateRange(DateTime firstDate, DateTime secondDate,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude);
+
+        //Consulta 15
+        Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndRainfallIndex(double index,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude);
+
 
 
 

@@ -252,7 +252,122 @@ namespace Pluviometrico.Core.Repository
             return response.Take(limit).Distinct().ToListAsync();
         }
 
+        public async Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndCity(string city,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude)
+        {
+            var response = await _context.MeasuredRainfallList
+                .Where(m => 
+                    m.Latitude > minLatitude &&
+                    m.Latitude < maxLatitude &&
+                    m.Longitude > minLongitude &&
+                    m.Longitude < maxLongitude
+                )
+                .Select(m => new MeasuredRainfallDTO
+                    {
+                        Source = "CEMADEN",
+                        City = m.Municipio,
+                        UF = m.UF,
+                        Day = m.Dia,
+                        Month = m.Mes,
+                        Year = m.Ano,
+                        Hour = m.Hora,
+                        StationCode = m.CodEstacaoOriginal,
+                        StationName = m.NomeEstacaoOriginal,
+                        RainfallIndex = m.ValorMedida,
+                        Distance = 6371 *
+                                Math.Acos(
+                                    Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                    Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                    Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                    Math.Sin((Math.PI / 180) * (m.Latitude))
+                                )
+                    }
+                )
+                .Where(s => s.City == city).ToListAsync();
 
+            return response.Take(10).ToList();
+        }
+
+        public async Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndDateRange(DateTime firstDate, DateTime secondDate,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude)
+        {
+            var dates = Utils.MaxMinDate(firstDate, secondDate);
+
+            var response = await _context.MeasuredRainfallList
+                .Where(m => 
+                    m.Latitude > minLatitude &&
+                    m.Latitude < maxLatitude &&
+                    m.Longitude > minLongitude &&
+                    m.Longitude < maxLongitude
+                )
+                .Select(m => new MeasuredRainfallDTO
+                    {
+                        Source = "CEMADEN",
+                        City = m.Municipio,
+                        UF = m.UF,
+                        Day = m.Dia,
+                        Month = m.Mes,
+                        Year = m.Ano,
+                        Hour = m.Hora,
+                        StationCode = m.CodEstacaoOriginal,
+                        StationName = m.NomeEstacaoOriginal,
+                        RainfallIndex = m.ValorMedida,
+                        Distance = 6371 *
+                                Math.Acos(
+                                    Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                    Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                    Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                    Math.Sin((Math.PI / 180) * (m.Latitude))
+                                ),
+                        Date = new DateTime(m.Ano, m.Mes, m.Dia)
+                    }
+                )
+                .Where(s => 
+                    s.Date >= dates.lesserDate &&
+                    s.Date <= dates.greaterDate 
+                ).ToListAsync();
+
+            return response.Take(10).ToList();
+        }
+
+        public async Task<List<MeasuredRainfallDTO>> FilterByGeolocationAndRainfallIndex(double index,
+            double minLatitude, double maxLatitude,
+            double minLongitude, double maxLongitude)
+        {
+            var response = await _context.MeasuredRainfallList
+                .Where(m =>
+                    m.Latitude > minLatitude &&
+                    m.Latitude < maxLatitude &&
+                    m.Longitude > minLongitude &&
+                    m.Longitude < maxLongitude
+                )
+                .Select(m => new MeasuredRainfallDTO
+                {
+                    Source = "CEMADEN",
+                    City = m.Municipio,
+                    UF = m.UF,
+                    Day = m.Dia,
+                    Month = m.Mes,
+                    Year = m.Ano,
+                    Hour = m.Hora,
+                    StationCode = m.CodEstacaoOriginal,
+                    StationName = m.NomeEstacaoOriginal,
+                    RainfallIndex = m.ValorMedida,
+                    Distance = 6371 *
+                                Math.Acos(
+                                    Math.Cos((Math.PI / 180) * (-22.913924)) * Math.Cos((Math.PI / 180) * (m.Latitude)) *
+                                    Math.Cos((Math.PI / 180) * (-43.084737) - (Math.PI / 180) * (m.Longitude)) +
+                                    Math.Sin((Math.PI / 180) * (-22.913924)) *
+                                    Math.Sin((Math.PI / 180) * (m.Latitude))
+                                )
+                }
+                )
+                .Where(s => s.RainfallIndex >= index).ToListAsync();
+
+            return response.Take(10).ToList();
+        }
 
 
 
