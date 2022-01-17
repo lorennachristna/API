@@ -12,22 +12,18 @@ namespace Pluviometrico.Core.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private IElasticClient _elasticClient;
-        private PostgreSQLContext _context;
         private PostgreSQLDWContext _postgreSQLDWContext;
 
         private MachineLearningRepository _machineLearningRepository;
         private IMeasuredRainfallRepository _measuredRainfallElastic;
-        private IMeasuredRainfallRepository _measuredRainfallPostgreSql;
         private IMeasuredRainfallRepository _measuredRainfallPostgreSqlDW;
 
-        public UnitOfWork(IElasticClient elasticClient, PostgreSQLContext context, PostgreSQLDWContext postgreSQLDWContext)
+        public UnitOfWork(IElasticClient elasticClient, PostgreSQLDWContext postgreSQLDWContext)
         {
             _elasticClient = elasticClient;
-            _context = context;
             _postgreSQLDWContext = postgreSQLDWContext;
             _machineLearningRepository = new MachineLearningRepository(_postgreSQLDWContext);
             _measuredRainfallElastic = new MeasuredRainfallRepositoryES(_elasticClient);
-            _measuredRainfallPostgreSql = new MeasuredRainfallRepositoryPostgreSQL(_context);
             _measuredRainfallPostgreSqlDW = new MeasuredRainfallRepositoryDW(_postgreSQLDWContext);
         }
 

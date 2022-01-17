@@ -26,10 +26,6 @@ namespace Pluviometrico
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<PostgreSQLContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("sqlPgUniqueTable")
-            ));
-
             services.AddDbContext<PostgreSQLDWContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("sqlPgDW")).EnableSensitiveDataLogging()
             );
