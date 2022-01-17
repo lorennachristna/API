@@ -9,9 +9,7 @@ namespace Pluviometrico.Data.DatabaseContext
         {
         }
 
-        public DWContext(DbContextOptions<DWContext> options) : base(options)
-        {
-        }
+        public DWContext(DbContextOptions options) : base(options) { }
 
         public DbSet<FactRain> FactRainList { get; set; }
         public DbSet<DimensionLocation> DimLocationList { get; set; }

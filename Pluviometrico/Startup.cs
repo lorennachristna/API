@@ -10,6 +10,7 @@ using Pluviometrico.Core.Repository;
 using Pluviometrico.Core.Repository.Interface;
 using Pluviometrico.Data;
 using Pluviometrico.Data.DatabaseContext;
+using Pluviometrico.Data.DatabaseContext.Database;
 
 namespace Pluviometrico
 {
@@ -29,7 +30,7 @@ namespace Pluviometrico
                 options.UseNpgsql(Configuration.GetConnectionString("sqlPgUniqueTable")
             ));
 
-            services.AddDbContext<DWContext>(options =>
+            services.AddDbContext<PostgreSQLDWContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("sqlPgDW")).EnableSensitiveDataLogging()
             );
 
