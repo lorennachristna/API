@@ -1,9 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pluviometrico.Core.DTOs;
 using Pluviometrico.Core.Repository.Interface;
-using Pluviometrico.Data;
 using Pluviometrico.Data.DatabaseContext;
-using Pluviometrico.Data.DWModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

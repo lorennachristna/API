@@ -20,60 +20,59 @@ namespace Pluviometrico.Controllers
         //TODO: Retornar status de erro quando der erro
         //TODO: padronizar controller
         //TODO: paging
-        //TODO: DTOs
         [HttpGet("ano/{year:int}")]
         public async Task<IActionResult> GetByDate(int year)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByYear(year);
+            var response = await _unitOfWork.FilterByYear(year);
             return Ok(response);
         }
 
         [HttpGet("indice/{index:int}")]
         public async Task<IActionResult> GetByRainfallIndex(int index)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByRainfallIndex(index);
+            var response = await _unitOfWork.FilterByRainfallIndex(index);
             return Ok(response);
         }
 
         [HttpGet("distancia")]
         public async Task<IActionResult> FilterByDistance([FromQuery] double distance)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistance(distance);
+            var response = await _unitOfWork.FilterByDistance(distance);
             return Ok(response);
         }
 
         [HttpGet("distancia/indice")]
         public async Task<IActionResult> FilterByDistanceAndRainfallIndex([FromQuery] double distance, [FromQuery] double index)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndRainfallIndex(distance, index);
+            var response = await _unitOfWork.FilterByDistanceAndRainfallIndex(distance, index);
             return Ok(response);
         }
 
         [HttpGet("distancia/data")]
         public async Task<IActionResult> FilterByDistanceAndDate([FromQuery] double distance, [FromQuery] int year, [FromQuery] int month, [FromQuery] int day)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndDate(distance, year, month, day);
+            var response = await _unitOfWork.FilterByDistanceAndDate(distance, year, month, day);
             return Ok(response);
         }
 
         [HttpGet("distancia/data-intervalo")]
         public async Task<IActionResult> FilterByDistanceAndDateRange([FromQuery] double distance, [FromQuery] DateTime firstDate, [FromQuery] DateTime secondDate)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndDateRange(firstDate, secondDate, distance);
+            var response = await _unitOfWork.FilterByDistanceAndDateRange(firstDate, secondDate, distance);
             return Ok(response);
         }
 
         [HttpGet("distancia/cidade")]
         public async Task<IActionResult> FilterByDistanceAndCity([FromQuery] double distance, [FromQuery] string city, [FromQuery] int limit)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByDistanceAndCity(distance, city, limit);
+            var response = await _unitOfWork.FilterByDistanceAndCity(distance, city, limit);
             return Ok(response);
         }
 
         [HttpGet("media/cidade")]
         public async Task<IActionResult> GetAverageRainfallIndexByCity([FromQuery] string city, [FromQuery] int limit)
         {
-            var response = await _unitOfWork.MeasuredRainfallList.GetAverageRainfallIndexByCity(city, limit);
+            var response = await _unitOfWork.GetAverageRainfallIndexByCity(city, limit);
             return Ok(response);
         }
 
@@ -84,7 +83,7 @@ namespace Pluviometrico.Controllers
             [FromQuery] double minLongitude, [FromQuery] double maxLongitude
         )
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByGeolocationAndCity(city, minLatitude, maxLatitude, minLongitude, maxLongitude);
+            var response = await _unitOfWork.FilterByGeolocationAndCity(city, minLatitude, maxLatitude, minLongitude, maxLongitude);
             return Ok(response);
         }
 
@@ -95,7 +94,7 @@ namespace Pluviometrico.Controllers
             [FromQuery] double minLongitude, [FromQuery] double maxLongitude
         )
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByGeolocationAndDateRange(firstDate, secondDate, minLatitude, maxLatitude, minLongitude, maxLongitude);
+            var response = await _unitOfWork.FilterByGeolocationAndDateRange(firstDate, secondDate, minLatitude, maxLatitude, minLongitude, maxLongitude);
             return Ok(response);
         }
 
@@ -106,7 +105,7 @@ namespace Pluviometrico.Controllers
             [FromQuery] double minLongitude, [FromQuery] double maxLongitude
         )
         {
-            var response = await _unitOfWork.MeasuredRainfallList.FilterByGeolocationAndRainfallIndex(index, minLatitude, maxLatitude, minLongitude, maxLongitude);
+            var response = await _unitOfWork.FilterByGeolocationAndRainfallIndex(index, minLatitude, maxLatitude, minLongitude, maxLongitude);
             return Ok(response);
         }
     }
