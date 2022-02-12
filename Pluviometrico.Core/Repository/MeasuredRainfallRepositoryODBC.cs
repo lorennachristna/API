@@ -28,7 +28,8 @@ namespace Pluviometrico.Core.Repository
                 INNER JOIN {_properties.Schema}dim_localidade_cemaden l ON l.id = fato.id_localidade
                 INNER JOIN {_properties.Schema}dim_fonte f ON f.id = fato.id_fonte
                 INNER JOIN {_properties.Schema}dim_estacao e ON e.id = fato.id_estacao
-                WHERE t.ano = {year}"
+                WHERE t.ano = {year}",
+                withDistance: false
             );
 
             return response;
@@ -45,7 +46,8 @@ namespace Pluviometrico.Core.Repository
                 INNER JOIN {_properties.Schema}dim_fonte f ON f.id = fato.id_fonte
                 INNER JOIN {_properties.Schema}dim_estacao e ON e.id = fato.id_estacao
                 WHERE fato.indice_pluv > {index.ToString(CultureInfo.InvariantCulture)}
-                "
+                ",
+                withDistance: false
             );
 
             return response;
@@ -134,7 +136,9 @@ namespace Pluviometrico.Core.Repository
                 AND calc.distancia > {distance.ToString(CultureInfo.InvariantCulture)}
                 ORDER BY calc.distancia
                 LIMIT {limit}
-                "
+                ",
+                withDateTime: false,
+                withRainfallIndex: false
             );
 
             return response;
@@ -144,7 +148,7 @@ namespace Pluviometrico.Core.Repository
         {
             var response = await ExecuteODBCQuery(
                 @$"
-                SELECT DISTINCT fonte, municipio, UF, cod_estacao_original, nome_estacao_original, CALC.DISTANCIA, AVG(indice_pluv)
+                SELECT DISTINCT fonte, municipio, UF, cod_estacao_original, nome_estacao_original, CALC.DISTANCIA, AVG(indice_pluv) AS media
                 FROM (SELECT f.fonte, l.municipio, l.UF, t.dia, t.mes, t.ano, t.hora, e.cod_estacao_original, e.nome_estacao_original, fato.indice_pluv, {_properties.DistanceCalculation} AS distancia
                 FROM {_properties.Schema}fato_chuva_cemaden fato 
                 INNER JOIN {_properties.Schema}dim_localidade_cemaden l ON l.id = fato.id_localidade
@@ -155,7 +159,10 @@ namespace Pluviometrico.Core.Repository
                 GROUP BY fonte, municipio, UF, cod_estacao_original, nome_estacao_original, CALC.DISTANCIA
                 ORDER BY calc.distancia
                 LIMIT {limit}
-                "
+                ",
+                withAvgIndex: true,
+                withRainfallIndex: false,
+                withDateTime: false
             );
 
             return response;
@@ -178,8 +185,7 @@ namespace Pluviometrico.Core.Repository
 		                   OR (l.long > {maxLongitude.ToString(CultureInfo.InvariantCulture)})
 		                   )
 	                 ) AS CALC
-                WHERE municipio = '{city}'
-                "
+                WHERE municipio = '{city}'"
             );
 
             return response;
@@ -233,10 +239,10 @@ namespace Pluviometrico.Core.Repository
 
         private async Task<List<MeasuredRainfallDTO>> ExecuteODBCQuery(
             string queryString,
-            bool withDistance = false,
+            bool withDistance = true,
             bool withAvgIndex = false,
-            bool withDateTime = false,
-            bool withRainfallIndex = false
+            bool withDateTime = true,
+            bool withRainfallIndex = true
             )
         {
             var command = new OdbcCommand(queryString);
@@ -280,7 +286,7 @@ namespace Pluviometrico.Core.Repository
 
                     if (withAvgIndex)
                     {
-                        averageRainfallIndexOrdinal = reader.GetOrdinal("AVG(indice_pluv)");
+                        averageRainfallIndexOrdinal = reader.GetOrdinal("media");
                     }
 
                     if (withRainfallIndex)
@@ -304,21 +310,21 @@ namespace Pluviometrico.Core.Repository
                         double? rainfallIndex = null;
 
                         if (withDistance)
-                            distance = reader.IsDBNull(distanceOrdinal) ? null : (double) reader.GetDecimal(distanceOrdinal);
+                            distance = reader.IsDBNull(distanceOrdinal) ? null : Convert.ToDouble(reader.GetValue(distanceOrdinal));
 
                         if (withAvgIndex)
-                            averageIndex = reader.IsDBNull(averageRainfallIndexOrdinal) ? null : (double) reader.GetDecimal(averageRainfallIndexOrdinal);
+                            averageIndex = reader.IsDBNull(averageRainfallIndexOrdinal) ? null : Convert.ToDouble(reader.GetValue(averageRainfallIndexOrdinal));
 
                         if (withDateTime)
                         {
-                            day = reader.IsDBNull(dayOrdinal) ? null : reader.GetInt32(dayOrdinal);
-                            month = reader.IsDBNull(monthOrdinal) ? null : reader.GetInt32(monthOrdinal);
-                            year = reader.IsDBNull(yearOrdinal) ? null : reader.GetInt32(yearOrdinal);
-                            hour = reader.IsDBNull(hourOrdinal) ? null : reader.GetInt32(hourOrdinal);
+                            day = reader.IsDBNull(dayOrdinal) ? null : Convert.ToInt32(reader.GetValue(dayOrdinal));
+                            month = reader.IsDBNull(monthOrdinal) ? null : Convert.ToInt32(reader.GetValue(monthOrdinal));
+                            year = reader.IsDBNull(yearOrdinal) ? null : Convert.ToInt32(reader.GetValue(yearOrdinal));
+                            hour = reader.IsDBNull(hourOrdinal) ? null : Convert.ToInt32(reader.GetValue(hourOrdinal));
                         }
 
                         if (withRainfallIndex)
-                            rainfallIndex = reader.IsDBNull(rainfallIndexOrdinal) ? null : (double)reader.GetDecimal(rainfallIndexOrdinal);
+                            rainfallIndex = reader.IsDBNull(rainfallIndexOrdinal) ? null : Convert.ToDouble(reader.GetValue(rainfallIndexOrdinal));
 
                         result.Add(new MeasuredRainfallDTO
                         {
