@@ -20,8 +20,8 @@ namespace Pluviometrico.Core.Repository
         }
         public async Task<List<MeasuredRainfallDTO>> FilterByYear(int year)
         {
-            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s =>
-                s.Query(q =>
+            var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Query(q =>
                     q.Bool(b => 
                         b.Must(m =>
                             m.Term(t => t.Field(f => f.Ano).Value(year))
@@ -229,6 +229,7 @@ namespace Pluviometrico.Core.Repository
         public async Task<List<MeasuredRainfallDTO>> FilterByDistanceAndCity(double distance, string city, int limit)
         {
             var response = await _elasticClient.SearchAsync<MeasuredRainfall>(s => s
+                .Size(limit)
                 .Source(true)
                 .ScriptFields(sf =>
                     sf.ScriptField("distancia", script => script
@@ -340,10 +341,8 @@ namespace Pluviometrico.Core.Repository
                     q.Bool(b => 
                         b.Must(m =>
                             m.Match(m => m.Field(f => f.Municipio).Query(city)) &&
-                            m.Range(t => t.Field(f => f.Latitude).GreaterThan(minLatitude)) &&
-                            m.Range(t => t.Field(f => f.Latitude).LessThan(maxLatitude)) &&
-                            m.Range(t => t.Field(f => f.Longitude).GreaterThan(minLongitude)) &&
-                            m.Range(t => t.Field(f => f.Longitude).LessThan(maxLongitude))))));
+                            m.Range(t => t.Field(f => f.Latitude).GreaterThan(minLatitude).LessThan(maxLatitude)) &&
+                            m.Range(t => t.Field(f => f.Longitude).GreaterThan(minLongitude).LessThan(maxLongitude))))));
 
             var filteredResponse = new List<MeasuredRainfallDTO>();
 
@@ -383,10 +382,8 @@ namespace Pluviometrico.Core.Repository
                     q.Bool(b =>
                         b.Must(m =>
                             m.DateRange(r => r.Field(f => f.DataHora).GreaterThanOrEquals(dates.lesserDate).LessThanOrEquals(dates.greaterDate)) &&
-                            m.Range(t => t.Field(f => f.Latitude).GreaterThan(minLatitude)) &&
-                            m.Range(t => t.Field(f => f.Latitude).LessThan(maxLatitude)) &&
-                            m.Range(t => t.Field(f => f.Longitude).GreaterThan(minLongitude)) &&
-                            m.Range(t => t.Field(f => f.Longitude).LessThan(maxLongitude))))));
+                            m.Range(t => t.Field(f => f.Latitude).GreaterThan(minLatitude).LessThan(maxLatitude)) &&
+                            m.Range(t => t.Field(f => f.Longitude).GreaterThan(minLongitude).LessThan(maxLongitude))))));
 
             var filteredResponse = new List<MeasuredRainfallDTO>();
 
@@ -423,10 +420,8 @@ namespace Pluviometrico.Core.Repository
                     q.Bool(b =>
                         b.Must(m =>
                             m.Range(r => r.Field(f => f.ValorMedida).GreaterThanOrEquals(index)) &&
-                            m.Range(t => t.Field(f => f.Latitude).GreaterThan(minLatitude)) &&
-                            m.Range(t => t.Field(f => f.Latitude).LessThan(maxLatitude)) &&
-                            m.Range(t => t.Field(f => f.Longitude).GreaterThan(minLongitude)) &&
-                            m.Range(t => t.Field(f => f.Longitude).LessThan(maxLongitude))))));
+                            m.Range(t => t.Field(f => f.Latitude).GreaterThan(minLatitude).LessThan(maxLatitude)) &&
+                            m.Range(t => t.Field(f => f.Longitude).GreaterThan(minLongitude).LessThan(maxLongitude))))));
 
             var filteredResponse = new List<MeasuredRainfallDTO>();
 
