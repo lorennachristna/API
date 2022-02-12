@@ -1,9 +1,5 @@
 ﻿using Pluviometrico.Data.DatabaseContext.Database;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Pluviometrico.Core.Repository
 {
@@ -40,9 +36,12 @@ namespace Pluviometrico.Core.Repository
                 case ("MonetDB"):
                     type = DatabaseType.MonetDB;
                     break;
+                case ("Apache Drill"):
+                    type = DatabaseType.ApacheDrill;
+                    break;
             }
 
-            return DatabaseType.PostgreSQL;
+            return DatabaseType.ApacheDrill;
         }
 
     }

@@ -4,6 +4,7 @@
     {
         ElasticSearch = 0,
         PostgreSQL = 1,
-        MonetDB = 2
+        MonetDB = 2,
+        ApacheDrill = 3
     }
 }
