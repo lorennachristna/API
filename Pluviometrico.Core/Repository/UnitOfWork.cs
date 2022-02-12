@@ -1,7 +1,8 @@
-﻿using Nest;
+﻿using Microsoft.Extensions.Configuration;
+using Nest;
 using Pluviometrico.Core.DTOs;
 using Pluviometrico.Core.Repository.Interface;
-using Pluviometrico.Data.DatabaseContext;
+using Pluviometrico.Core.Repository.ODBC;
 using Pluviometrico.Data.DatabaseContext.Database;
 using System;
 using System.Collections.Generic;
@@ -17,14 +18,18 @@ namespace Pluviometrico.Core.Repository
         private MachineLearningRepository _machineLearningRepository;
         private IMeasuredRainfallRepository _measuredRainfallElastic;
         private IMeasuredRainfallRepository _measuredRainfallPostgreSqlDW;
+        private IMeasuredRainfallRepository _measuredRainfallMonetDb;
+        private IMeasuredRainfallRepository _measuredRainfallDrill;
 
-        public UnitOfWork(IElasticClient elasticClient, PostgreSQLDWContext postgreSQLDWContext)
+        public UnitOfWork(IElasticClient elasticClient, PostgreSQLDWContext postgreSQLDWContext, IConfiguration configuration)
         {
             _elasticClient = elasticClient;
             _postgreSQLDWContext = postgreSQLDWContext;
             _machineLearningRepository = new MachineLearningRepository(_postgreSQLDWContext);
             _measuredRainfallElastic = new MeasuredRainfallRepositoryES(_elasticClient);
             _measuredRainfallPostgreSqlDW = new MeasuredRainfallRepositoryDW(_postgreSQLDWContext);
+            _measuredRainfallMonetDb = new MeasuredRainfallRepositoryODBC(new MonetDBProperties(configuration));
+            _measuredRainfallDrill = new MeasuredRainfallRepositoryODBC(new DrillProperties(configuration));
         }
 
         private DatabaseType GetBestPerformingDatabase(int queryNumber)
@@ -35,7 +40,7 @@ namespace Pluviometrico.Core.Repository
         //APAGAR
         private DatabaseType GetDatabase()
         {
-            return DatabaseType.PostgreSQL;
+            return DatabaseType.MonetDB;
         }
 
         private IMeasuredRainfallRepository GetDatabaseRepository(DatabaseType database)
@@ -49,6 +54,14 @@ namespace Pluviometrico.Core.Repository
             else if (database == DatabaseType.PostgreSQL)
             {
                 measuredRainfall = _measuredRainfallPostgreSqlDW;
+            }
+            else if (database == DatabaseType.MonetDB)
+            {
+                measuredRainfall = _measuredRainfallMonetDb;
+            }
+            else if (database == DatabaseType.ApacheDrill)
+            {
+                measuredRainfall = _measuredRainfallDrill;
             }
             else
             {

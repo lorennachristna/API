@@ -39,6 +39,7 @@ namespace Pluviometrico
             var settings = new ConnectionSettings().DefaultMappingFor<MeasuredRainfall>(d => d.IndexName("dados_chuva_cemaden"));
             services.AddSingleton<IElasticClient>(new ElasticClient(settings));
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddSingleton<IConfiguration>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
