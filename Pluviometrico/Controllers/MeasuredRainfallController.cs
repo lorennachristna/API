@@ -27,8 +27,8 @@ namespace Pluviometrico.Controllers
             return Ok(response);
         }
 
-        [HttpGet("indice/{index:int}")]
-        public async Task<IActionResult> GetByRainfallIndex(int index)
+        [HttpGet("indice/{index:double}")]
+        public async Task<IActionResult> GetByRainfallIndex(double index)
         {
             var response = await _unitOfWork.FilterByRainfallIndex(index);
             return Ok(response);
