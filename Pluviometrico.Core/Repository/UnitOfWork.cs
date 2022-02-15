@@ -20,6 +20,7 @@ namespace Pluviometrico.Core.Repository
         private IMeasuredRainfallRepository _measuredRainfallPostgreSqlDW;
         private IMeasuredRainfallRepository _measuredRainfallMonetDb;
         private IMeasuredRainfallRepository _measuredRainfallDrill;
+        private IMeasuredRainfallRepository _measuredRainfallSpark;
 
         public UnitOfWork(IElasticClient elasticClient, PostgreSQLDWContext postgreSQLDWContext, IConfiguration configuration)
         {
@@ -30,6 +31,7 @@ namespace Pluviometrico.Core.Repository
             _measuredRainfallPostgreSqlDW = new MeasuredRainfallRepositoryDW(_postgreSQLDWContext);
             _measuredRainfallMonetDb = new MeasuredRainfallRepositoryODBC(new MonetDBProperties(configuration));
             _measuredRainfallDrill = new MeasuredRainfallRepositoryODBC(new DrillProperties(configuration));
+            _measuredRainfallSpark = new MeasuredRainfallRepositorySpark();
         }
 
         private DatabaseType GetBestPerformingDatabase(int queryNumber)
@@ -40,7 +42,7 @@ namespace Pluviometrico.Core.Repository
         //APAGAR
         private DatabaseType GetDatabase()
         {
-            return DatabaseType.MonetDB;
+            return DatabaseType.ApacheSpark;
         }
 
         private IMeasuredRainfallRepository GetDatabaseRepository(DatabaseType database)
@@ -62,6 +64,10 @@ namespace Pluviometrico.Core.Repository
             else if (database == DatabaseType.ApacheDrill)
             {
                 measuredRainfall = _measuredRainfallDrill;
+            }
+            else if (database == DatabaseType.ApacheSpark)
+            {
+                measuredRainfall = _measuredRainfallSpark;
             }
             else
             {

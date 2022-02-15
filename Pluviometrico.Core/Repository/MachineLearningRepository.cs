@@ -39,9 +39,12 @@ namespace Pluviometrico.Core.Repository
                 case ("Apache Drill"):
                     type = DatabaseType.ApacheDrill;
                     break;
+                case ("Apache Spark"):
+                    type = DatabaseType.ApacheSpark;
+                    break;
             }
 
-            return DatabaseType.ApacheDrill;
+            return DatabaseType.ApacheSpark;
         }
 
     }

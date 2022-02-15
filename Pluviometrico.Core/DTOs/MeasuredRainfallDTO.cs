@@ -1,21 +1,46 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace Pluviometrico.Core.DTOs
 {
     public class MeasuredRainfallDTO : IEquatable<MeasuredRainfallDTO>
     {
+        [JsonPropertyName("fonte")]
         public string Source { get; set; }
+
+        [JsonPropertyName("municipio")]
         public string City { get; set; }
+
+        [JsonPropertyName("uf")]
         public string UF { get; set; }
+
+        [JsonPropertyName("dia")]
         public int? Day { get; set; }
+
+        [JsonPropertyName("mes")]
         public int? Month { get; set; }
+
+        [JsonPropertyName("ano")]
         public int? Year { get; set; }
+
+        [JsonPropertyName("hora")]
         public int? Hour { get; set; }
+
+        [JsonPropertyName("cod_estacao_original")]
         public string StationCode { get; set; }
+
+        [JsonPropertyName("nome_estacao_original")]
         public string StationName { get; set; }
+
+        [JsonPropertyName("distancia")]
         public double? Distance { get; set; }
+
+        [JsonPropertyName("indice_pluv")]
         public double? RainfallIndex { get; set; }
+
+        [JsonPropertyName("media")]
         public double? AverageRainfallIndex { get; set; }
+
         public DateTime? Date { get; set; }
 
 
